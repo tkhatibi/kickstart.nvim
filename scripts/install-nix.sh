@@ -2,7 +2,7 @@
 
 set -e
 
-set -euo pipefail
+# set -euo pipefail
 
 # 1. Install Nix in multi-user mode
 echo "Installing Nix (multi-user mode)..."

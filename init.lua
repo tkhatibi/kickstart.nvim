@@ -240,6 +240,25 @@ vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   {
+    'rmagatti/auto-session',
+    lazy = false,
+    keys = {
+      -- Will use Telescope if installed or a vim.ui.select picker otherwise
+      { '<leader>ss', '<cmd>SessionSearch<CR>', desc = '[S]earch [S]essions' },
+      { '<leader>wr', '<cmd>SessionSearch<CR>', desc = 'Session search' },
+      { '<leader>ws', '<cmd>SessionSave<CR>', desc = 'Save session' },
+      { '<leader>wa', '<cmd>SessionToggleAutoSave<CR>', desc = 'Toggle autosave' },
+    },
+
+    ---enables autocomplete for opts
+    ---@module "auto-session"
+    ---@type AutoSession.Config
+    opts = {
+      suppressed_dirs = { '~/', '~/Projects', '~/Downloads', '/' },
+      -- log_level = 'debug',
+    }
+  },
+  {
     'mg979/vim-visual-multi',
     branch = 'master',
   },

@@ -63,9 +63,33 @@ nvim -u NONE -N
 
 - `:qa` closes all tabs and exits
 
+### Commenting Several Lines
+
+#### First Approach
+
+- Place your cursor on the first character of the first line you want to comment.
+- Press `<C V>` (or `<C Q>` on some systems, especially Windows, though `<C V>` is standard for Linux/macOS).
+- You'll see `VISUAL BLOCK` in the status line.
+- Move your cursor down to the last line you want to comment.
+- Press `<S I>` (capital I).
+- You'll enter insert mode, but only for the first selected line.
+- Type your comment character(s), e.g., `//` for C-like languages, `#` for Python/Ruby, `--` for SQL/Lua,
+
+#### Easier Approach
+
+- `gcc` comments or uncomments the selected lines
+
+### Normal Mode
+
+- `~` toggles current char to uppercase if it's lowercase or vice versa
+- `r` replaces current char
+- `R` replaces current char and goes to next char while still is in replace mode
+
 ### Insert Mode
 
 - `C` clears rest of current line before going to insert mode
+- `<C n>` goes to next item in autocomplete window
+- `<C p>` goes to prev item in autocomplete window
 
 ### Multi Cursor
 

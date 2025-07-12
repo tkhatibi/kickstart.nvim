@@ -26,6 +26,7 @@ nvim -u NONE -N
 *`<leader>` is normally defined by the mapleader variable as `\` or `Space`*
 *`<C W>` means `Ctrl+W`
 *`<CR>` means `Enter`
+*`<S I>` means `Shift+I`
 
 ### Commands
 
@@ -33,6 +34,14 @@ nvim -u NONE -N
 - `:luafile $HOME/.config/nvim/init.lua` like above
 - `:Lazy sync` Runs install, clean and update
 - `@:` runs the last command in Neovim
+
+### Substitution
+
+- `:s/old/new` To substitute new for the first old in a line type
+- `:s/old/new/g` To substitute new for all olds on a line type
+- `:#,#s/old/new/g` To substitute phrases between two line #'s type
+- `:%s/old/new/g` To substitute all occurrences in the file type
+- `:%s/old/new/gc` To ask for confirmation each time add 'c'
 
 ### Buffers, Windows, Tabs
 

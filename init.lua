@@ -165,6 +165,8 @@ vim.opt.confirm = true
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- Rename Symbol with LSP
+vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { desc = "LSP Rename" })
 
 -- Add a blank line below without moving the cursor
 vim.keymap.set("n", "<leader>o", "mzo<Esc>`z", { desc = "Add blank line below" })

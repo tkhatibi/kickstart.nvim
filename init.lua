@@ -165,6 +165,13 @@ vim.opt.confirm = true
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+
+-- Add a blank line below without moving the cursor
+vim.keymap.set("n", "<leader>o", "mzo<Esc>`z", { desc = "Add blank line below" })
+
+-- Add a blank line above without moving the cursor
+vim.keymap.set("n", "<leader>O", "mzO<Esc>`z", { desc = "Add blank line above" })
+
 -- Move current line down with Alt + j
 vim.keymap.set("n", "<A-j>", "mz:m+1<CR>`z==", { desc = "Move line down" })
 
@@ -176,6 +183,7 @@ vim.keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" 
 
 -- Move selected lines up with Alt + k
 vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
+
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`

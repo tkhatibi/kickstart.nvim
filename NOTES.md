@@ -82,15 +82,24 @@ nvim -u NONE -N
 
 ### Normal Mode
 
-- `~` toggles current char to uppercase if it's lowercase or vice versa
-- `r` replaces current char
-- `R` replaces current char and goes to next char while still is in replace mode
+- N`~` toggles current char to uppercase if it's lowercase or vice versa
+- N`r` replaces current char
+- N`R` replaces current char and goes to next char while still is in replace mode
 
 ### Insert Mode
 
-- `C` clears rest of current line before going to insert mode
-- `<C n>` goes to next item in autocomplete window
-- `<C p>` goes to prev item in autocomplete window
+- N`C` clears rest of current line before going to insert mode
+
+### Auto Complete
+- I`<C Space>` opens the autocomplete window
+  - I`<C y>` selects the first item in autocomplete window
+  - I`<C n>` selects the next item in autocomplete window
+  - I`<C p>` selects the prev item in autocomplete window
+  - I`<C Space>` opens/closes the floating documentation of the hovered item in autocomplete window
+    - I`<C f>` scrolls down the floating documentation of the hovered item in autocomplete window
+    - I`<C b>` scrolls up the floating documentation of the hovered item in autocomplete window
+- N`<S k>` opens the floating doc of the hovered symbol in normal mode
+  - N`<C w>w` switches to the floating doc window to make you able to scroll up/down with k/j
 
 ### Multi Cursor
 

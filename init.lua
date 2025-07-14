@@ -165,6 +165,18 @@ vim.opt.confirm = true
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- Move current line down with Alt + j
+vim.keymap.set("n", "<A-j>", "mz:m+1<CR>`z==", { desc = "Move line down" })
+
+-- Move current line up with Alt + k
+vim.keymap.set("n", "<A-k>", "mz:m-2<CR>`z==", { desc = "Move line up" })
+
+-- Move selected lines down with Alt + j
+vim.keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
+
+-- Move selected lines up with Alt + k
+vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')

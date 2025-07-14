@@ -34,6 +34,7 @@ nvim -u NONE -N
 - `:luafile $HOME/.config/nvim/init.lua` like above
 - `:Lazy sync` Runs install, clean and update
 - `@:` runs the last command in Neovim
+- `:SessionDelete /path/to/dir` deletes the session `/path/to/dir`
 
 ### Substitution
 

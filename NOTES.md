@@ -21,12 +21,26 @@ nvim -u NONE -N
 - `<space>sh` shows you lists of all the helps
 - `:help wincmd`
 
-## Shortcuts
+## Keycodes
 
 *`<leader>` is normally defined by the mapleader variable as `\` or `Space`*
-*`<C W>` means `Ctrl+W`
+*`<C-w>` means `Ctrl+W`
+*`<A-k>` means `Alt+K`
 *`<CR>` means `Enter`
-*`<S I>` means `Shift+I`
+*`<S-i>` means `Shift+I`
+
+### Custom keymaps
+
+- N`<F2>` rename symbol in the whole workspace
+- N`<C-a>` to select all lines
+- N`<leader>d` to open and switch to line diagnostics window
+- N`<leader>w` to open and switch to wiki window (docs)
+- N`<leader>o` to add a line below without cursor moving
+- N`<leader>O` to add a line above without cursor moving
+- N`<A-k>` to move current line above
+- N`<A-j>` to move current line below
+- V`<A-k>` to move selected lines above
+- V`<A-j>` to move selected lines below
 
 ### Commands
 

@@ -188,6 +188,11 @@ vim.keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" 
 -- Move selected lines up with Alt + k
 vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
 
+-- Opens floating window of current line diagnostics and then switches to it
+vim.keymap.set("n", "gd", function()
+  vim.diagnostic.open_float(nil, { scope = "line", focus = true })
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>w", true, false, true), "n", true)
+end, { desc = "Show Line [D]iagnostics in Float" })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`

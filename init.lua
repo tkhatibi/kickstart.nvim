@@ -189,10 +189,29 @@ vim.keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" 
 vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
 
 -- Opens floating window of current line diagnostics and then switches to it
-vim.keymap.set("n", "gd", function()
+vim.keymap.set("n", "<leader>d", function()
   vim.diagnostic.open_float(nil, { scope = "line", focus = true })
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>w", true, false, true), "n", true)
-end, { desc = "Show Line [D]iagnostics in Float" })
+end, { desc = "Line [D]iagnostics" })
+
+-- Opens floating doc of hovered symbol and then switches to it
+vim.keymap.set("n", "<leader>w", function()
+  local params = vim.lsp.util.make_position_params()
+  vim.lsp.buf_request(0, 'textDocument/hover', params, function(_, result, ctx, _)
+    if result and result.contents then
+      local markdown_lines = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
+      markdown_lines = vim.lsp.util.trim_empty_lines(markdown_lines)
+      if not vim.tbl_isempty(markdown_lines) then
+        local bufnr, winid = vim.lsp.util.open_floating_preview(markdown_lines, "markdown", { border = "single" })
+        -- focus on the floating window
+        vim.api.nvim_set_current_win(winid)
+      end
+    end
+  end)
+end, { desc = "[W]iki (Documentation)" })
+
+-- Selects all lines
+vim.api.nvim_set_keymap('n', '<C-a>', 'ggVG', { noremap = true, silent = true })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
@@ -298,9 +317,9 @@ require('lazy').setup({
     keys = {
       -- Will use Telescope if installed or a vim.ui.select picker otherwise
       { '<leader>ss', '<cmd>SessionSearch<CR>', desc = '[S]earch [S]essions' },
-      { '<leader>wr', '<cmd>SessionSearch<CR>', desc = 'Session search' },
-      { '<leader>ws', '<cmd>SessionSave<CR>', desc = 'Save session' },
-      { '<leader>wa', '<cmd>SessionToggleAutoSave<CR>', desc = 'Toggle autosave' },
+      -- { '<leader>wr', '<cmd>SessionSearch<CR>', desc = 'Session search' },
+      -- { '<leader>ws', '<cmd>SessionSave<CR>', desc = 'Save session' },
+      -- { '<leader>wa', '<cmd>SessionToggleAutoSave<CR>', desc = 'Toggle autosave' },
     },
 
     ---enables autocomplete for opts

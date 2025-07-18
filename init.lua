@@ -172,6 +172,8 @@ vim.opt.confirm = true
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+vim.keymap.set('i', '<C-d>', '<Del>', { noremap = true })
+
 -- Open Terminal
 vim.keymap.set('n', '<leader>t', ':terminal<CR>', { noremap = true, silent = true, desc = "[T]erminal" })
 

@@ -31,17 +31,22 @@ nvim -u NONE -N
 
 ### Custom keymaps
 
+- N`<leader>t` to open terminal
+- T`<leader><leader>` to back to normal mode when you're in terminal insert mode
+
 - N`<C-0>` reset neovide scale factor
 - N`<C-=>` increase neovide scale factor
 - N`<C-->` decrease neovide scale factor
-- N`<F2>` rename symbol in the whole workspace
-- N`<C-a>` to select all lines
+
 - N`gl` LSP commands
+- N`<F2>` rename symbol in the whole workspace
 - N`<leader>g` to open and switch to line diagnostics window
 - N`<leader>k` to open and switch to wiki window (docs)
 - N`<leader>d` to open document symbols
 - N`<leader>w` to open workspace symbols
 - N`<leader>r` to open symbol references
+
+- N`<C-a>` to select all lines
 - N`<A-o>` to add a line below without cursor moving
 - N`<A-O>` to add a line above without cursor moving
 - N`<A-k>` to move current line above

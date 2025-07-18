@@ -172,6 +172,13 @@ vim.opt.confirm = true
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- Open Terminal
+vim.keymap.set('n', '<leader>t', ':terminal<CR>', { noremap = true, silent = true, desc = "[T]erminal" })
+
+-- Exit from `terminal` mode to `normal`
+vim.keymap.set('t', '<leader><leader>', [[<C-\><C-n>]], { noremap = true, desc = "Exit from `terminal` mode to `normal`" })
+-- vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]], { noremap = true }) -- usafe
+
 -- Rename Symbol with LSP
 vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { desc = "LSP Rename" })
 
@@ -438,7 +445,7 @@ require('lazy').setup({
       -- Document existing key chains
       spec = {
         { '<leader>s', group = '[S]earch' },
-        { '<leader>t', group = '[T]oggle' },
+        { '<leader>T', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
       },
     },
@@ -719,7 +726,7 @@ require('lazy').setup({
           -- This may be unwanted, since they displace some of your code
           if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
             vim.lsp.inlay_hint.enable(true)
-            map('<leader>th', function()
+            map('<leader>Th', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle Inlay [H]ints')
           end

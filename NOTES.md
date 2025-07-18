@@ -33,6 +33,12 @@ nvim -u NONE -N
 
 - N`<leader>t` to open terminal
 - T`<leader><leader>` to back to normal mode when you're in terminal insert mode
+- **You need to `zsh` shortcuts, if you don't want to use arrow keys at all
+  - `Ctrl+P` for previous command
+  - `Ctrl+N` for next command
+  - `Ctrl+R` for reverse search
+  - `Ctrl+E` to move to end of line or use placeholder
+  - `Ctrl+A` to move to beginning
 
 - N`<C-0>` reset neovide scale factor
 - N`<C-=>` increase neovide scale factor

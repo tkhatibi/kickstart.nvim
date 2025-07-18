@@ -204,6 +204,9 @@ vim.keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" 
 -- Move selected lines up with Alt + k
 vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
 
+-- Lazy Window
+vim.keymap.set("n", "<leader>l", ":Lazy<CR>", { desc = "La[z]y Window" })
+
 -- Opens floating window of current line diagnostics and then switches to it
 vim.keymap.set("n", "<leader>g", function()
   vim.diagnostic.open_float(nil, { scope = "line", focus = true })

@@ -786,16 +786,29 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         clangd = {},
-        -- gopls = {},
+        cmake = {},
+        jinja_lsp = {},
+        -- css_variables = {}, -- unofficial (typescript)
+        -- docker_compose_language_service = {},
+        -- gitlab_ci_ls = {}, -- unofficial (rust)
+        -- gh_actions_ls = {}, -- unofficial (javascript)
+        -- ols = {}, -- odin ls
+        buf_ls = {}, -- proto buffer (go)
+        -- tailwindcss = {}, -- official
+        -- html = {}, -- vscode extracted (js)
+        -- eslint = {}, -- vscode extracted (js)
+        -- cssls = {}, -- vscode extracted (js)
+        -- jsonls = {}, -- vscode extracted (js)
+        markdown_oxide = {}, -- markdown ls (rust)
+        taplo = {}, -- toml formatter (rust)
+        -- vacuum = {}, -- openapi 2 and 3 (go)
+        -- gopls = {}, -- golang
         -- pyright = {},
         rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
         --
 
         lua_ls = {

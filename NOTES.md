@@ -60,6 +60,10 @@ nvim -u NONE -N
 - V`<A-k>` to move selected lines above
 - V`<A-j>` to move selected lines below
 
+- N`<C-Tab>` to switch tabs
+- N`<C-l>` to go to the right window
+- N`<C-h>` to go to the left window
+
 ### Commands
 
 - `:source %` reloads your `init.lua` without `lazy.nvim` changes
@@ -112,26 +116,37 @@ nvim -u NONE -N
 
 - `gcc` comments or uncomments the selected lines
 
-### Normal Mode
+### Case
 
-- N`~` toggles current char to uppercase if it's lowercase or vice versa
+- N`~` toggles selected char(s) to uppercase or lowercase
+
+### Editing
+
+- N`x` deletes current char
+- N`X` deletes prev char
 - N`r` replaces current char
 - N`R` replaces current char and goes to next char while still is in replace mode
-
-### Insert Mode
-
+- N`D` deletes rest of current line
 - N`C` clears rest of current line before going to insert mode
+- N`dd` deletes current line
+- N`cc` clears current line
+- I`<C-h>` = `backspace`
+- I`<C-d>` = `delete`
+- I`<C-m>` = `enter`
+- I`<C-t>` indents current line forward
+- I`<C-w>` deletes the word before the cursor
+- I`<C-u>` Deletes everything before the cursor on the current line
 
 ### Auto Complete
 - I`<C Space>` opens the autocomplete window
-  - I`<C y>` selects the first item in autocomplete window
-  - I`<C n>` selects the next item in autocomplete window
-  - I`<C p>` selects the prev item in autocomplete window
-  - I`<C Space>` opens/closes the floating documentation of the hovered item in autocomplete window
-    - I`<C f>` scrolls down the floating documentation of the hovered item in autocomplete window
-    - I`<C b>` scrolls up the floating documentation of the hovered item in autocomplete window
+  - I`<C-y>` selects the first item in autocomplete window
+  - I`<C-n>` selects the next item in autocomplete window
+  - I`<C-p>` selects the prev item in autocomplete window
+  - I`<C-Space>` opens/closes the floating documentation of the hovered item in autocomplete window
+    - I`<C-f>` scrolls down the floating documentation of the hovered item in autocomplete window
+    - I`<C-b>` scrolls up the floating documentation of the hovered item in autocomplete window
 - N`<S k>` opens the floating doc of the hovered symbol in normal mode
-  - N`<C w>w` switches to the floating doc window to make you able to scroll up/down with k/j
+  - N`<C-w>w` switches to the floating doc window to make you able to scroll up/down with k/j
 
 ### Multi Cursor
 

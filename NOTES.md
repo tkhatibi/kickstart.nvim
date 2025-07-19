@@ -31,6 +31,8 @@ nvim -u NONE -N
 
 ### Custom keymaps
 
+- N`<leader>e` to open file explorer
+
 - N`<leader>t` to open terminal
 - T`<leader><leader>` to back to normal mode when you're in terminal insert mode
 - **You need to `zsh` shortcuts, if you don't want to use arrow keys at all
@@ -63,14 +65,17 @@ nvim -u NONE -N
 - N`<C-Tab>` to switch tabs
 - N`<C-l>` to go to the right window
 - N`<C-h>` to go to the left window
+- N`<A-l>` to go to the next tab
+- N`<A-h>` to go to the prev tab
 
 ### Commands
 
-- `:source %` reloads your `init.lua` without `lazy.nvim` changes
+- `:source %` reloads your `init.lua` without `lazy.nvim` changes (works on keymaps)
 - `:luafile $HOME/.config/nvim/init.lua` like above
 - `:Lazy sync` Runs install, clean and update
-- `@:` runs the last command in Neovim
+- `:@` runs the last command in Neovim
 - `:SessionDelete /path/to/dir` deletes the session `/path/to/dir`
+- `:e .` opens the current directory using the native `netrw` plugin
 
 ### Substitution
 
@@ -130,6 +135,7 @@ nvim -u NONE -N
 - N`C` clears rest of current line before going to insert mode
 - N`dd` deletes current line
 - N`cc` clears current line
+- N`<S-i>` moves cursor before the first alphanumeric char in the line and then goes to insert mode
 - I`<C-h>` = `backspace`
 - I`<C-d>` = `delete`
 - I`<C-m>` = `enter`

@@ -176,6 +176,15 @@ vim.opt.confirm = true
 
 vim.keymap.set('i', '<C-d>', '<Del>', { noremap = true })
 
+-- Go to next tab
+vim.keymap.set('n', '<A-l>', 'gt', { noremap = true })
+
+-- Go to prev tab
+vim.keymap.set('n', '<A-h>', 'gT', { noremap = true })
+
+-- Opens current directory using netrw plugin
+vim.keymap.set('n', '<leader>e', ':e .<CR>', { noremap = true, desc = "File [E]xplorer" })
+
 -- Open Terminal
 vim.keymap.set('n', '<leader>t', ':terminal<CR>', { noremap = true, silent = true, desc = "[T]erminal" })
 

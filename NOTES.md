@@ -32,6 +32,7 @@ nvim -u NONE -N
 ### Custom keymaps
 
 - N`<leader>e` to open file explorer
+- N`<leader>z` to open lazy window
 
 - N`<leader>t` to open terminal
 - T`<leader><leader>` to back to normal mode when you're in terminal insert mode
@@ -67,6 +68,8 @@ nvim -u NONE -N
 - N`<C-h>` to go to the left window
 - N`<A-l>` to go to the next tab
 - N`<A-h>` to go to the prev tab
+
+- N`<leader>m` to remove all `^M`s in the document
 
 ### Commands
 
@@ -142,6 +145,7 @@ nvim -u NONE -N
 - I`<C-t>` indents current line forward
 - I`<C-w>` deletes the word before the cursor
 - I`<C-u>` Deletes everything before the cursor on the current line
+- N`A` goes to last char of current line in insert mode
 
 ### Auto Complete
 - I`<C Space>` opens the autocomplete window
@@ -175,12 +179,15 @@ nvim -u NONE -N
 
 ### Navigation
 
-- `<C d>` goes down for 20 lines
-- `<C u>` goes up for 20 lines
+- `<C-d>` moves cursor down for 20 lines
+- `<C-u>` moves cursor up for 20 lines
 - `gg` goes to first line of the file
 - `G` goes to last line of the file
+- `L` moves cursor down to the last visible line
+- `H` moves cursor up to the first visible line
 - `f d` goes to first d character of current line
-- `Shift A` goes to last char of current line in insert mode
+- `<C-y>` scrolls up without moving cursor
+- `<C-e>` scrolls down without moving cursor
 
 ## How to install?
 

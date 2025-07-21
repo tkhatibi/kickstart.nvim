@@ -163,7 +163,7 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 999
+vim.opt.scrolloff = 5
 -- vim.opt.sidescrolloff = 999
 
 -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
@@ -214,7 +214,12 @@ vim.keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" 
 vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
 
 -- Lazy Window
-vim.keymap.set("n", "<leader>l", ":Lazy<CR>", { desc = "La[z]y Window" })
+vim.keymap.set("n", "<leader>z", ":Lazy<CR>", { desc = "La[z]y Window" })
+
+-- Remove all ^M in document
+vim.keymap.set("n", "<leader>m", function()
+  vim.cmd([[%s/\r//g]])
+end, { desc = "Remove Carriage Returns" })
 
 -- Opens floating window of current line diagnostics and then switches to it
 vim.keymap.set("n", "<leader>g", function()

@@ -84,14 +84,15 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
-vim.o.winborder = "rounded"
+vim.o.winborder = 'rounded'
 
 -- Neovide Settings
-vim.g.neovide_cursor_vfx_mode = "wireframe"
-vim.g.neovide_scale_factor = 0.8
-vim.api.nvim_set_keymap("n", "<C-0>", ":lua vim.g.neovide_scale_factor = 0.8<CR>", {silent = true, noremap = true})
-vim.api.nvim_set_keymap("n", "<C-=>", ":lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.05<CR>", {silent = true})
-vim.api.nvim_set_keymap("n", "<C-->", ":lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.05<CR>", {silent = true})
+vim.g.neovide_cursor_vfx_mode = 'wireframe'
+vim.g.neovide_scale_factor = 1
+vim.o.guifont = 'FiraCode Nerd Font Mono:h11'
+vim.api.nvim_set_keymap('n', '<C-0>', ':lua vim.g.neovide_scale_factor = 1<CR>', { silent = true, noremap = true })
+vim.api.nvim_set_keymap('n', '<C-=>', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.05<CR>', { silent = true })
+vim.api.nvim_set_keymap('n', '<C-->', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.05<CR>', { silent = true })
 
 -- Set <space> as the leader key
 -- See `:help mapleader`
@@ -183,65 +184,65 @@ vim.keymap.set('n', '<A-l>', 'gt', { noremap = true })
 vim.keymap.set('n', '<A-h>', 'gT', { noremap = true })
 
 -- Opens current directory using netrw plugin
-vim.keymap.set('n', '<leader>e', ':e .<CR>', { noremap = true, desc = "File [E]xplorer" })
+vim.keymap.set('n', '<leader>e', ':e .<CR>', { noremap = true, desc = 'File [E]xplorer' })
 
 -- Open Terminal
-vim.keymap.set('n', '<leader>t', ':terminal<CR>', { noremap = true, silent = true, desc = "[T]erminal" })
+vim.keymap.set('n', '<leader>t', ':terminal<CR>', { noremap = true, silent = true, desc = '[T]erminal' })
 
 -- Exit from `terminal` mode to `normal`
-vim.keymap.set('t', '<leader><leader>', [[<C-\><C-n>]], { noremap = true, desc = "Exit from `terminal` mode to `normal`" })
+vim.keymap.set('t', '<leader><leader>', [[<C-\><C-n>]], { noremap = true, desc = 'Exit from `terminal` mode to `normal`' })
 -- vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]], { noremap = true }) -- usafe
 
 -- Rename Symbol with LSP
-vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { desc = "LSP Rename" })
+vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, { desc = 'LSP Rename' })
 
 -- Add a blank line below without moving the cursor
-vim.keymap.set("n", "<A-o>", "mzo<Esc>`z", { desc = "Add blank line below" })
+vim.keymap.set('n', '<A-o>', 'mzo<Esc>`z', { desc = 'Add blank line below' })
 
 -- Add a blank line above without moving the cursor
-vim.keymap.set("n", "<A-O>", "mzO<Esc>`z", { desc = "Add blank line above" })
+vim.keymap.set('n', '<A-O>', 'mzO<Esc>`z', { desc = 'Add blank line above' })
 
 -- Move current line down with Alt + j
-vim.keymap.set("n", "<A-j>", "mz:m+1<CR>`z==", { desc = "Move line down" })
+vim.keymap.set('n', '<A-j>', 'mz:m+1<CR>`z==', { desc = 'Move line down' })
 
 -- Move current line up with Alt + k
-vim.keymap.set("n", "<A-k>", "mz:m-2<CR>`z==", { desc = "Move line up" })
+vim.keymap.set('n', '<A-k>', 'mz:m-2<CR>`z==', { desc = 'Move line up' })
 
 -- Move selected lines down with Alt + j
-vim.keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
+vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' })
 
 -- Move selected lines up with Alt + k
-vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
+vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
 
 -- Lazy Window
-vim.keymap.set("n", "<leader>z", ":Lazy<CR>", { desc = "La[z]y Window" })
+vim.keymap.set('n', '<leader>z', ':Lazy<CR>', { desc = 'La[z]y Window' })
 
 -- Remove all ^M in document
-vim.keymap.set("n", "<leader>m", function()
-  vim.cmd([[%s/\r//g]])
-end, { desc = "Remove Carriage Returns" })
+vim.keymap.set('n', '<leader>m', function()
+  vim.cmd [[%s/\r//g]]
+end, { desc = 'Remove Carriage Returns' })
 
 -- Opens floating window of current line diagnostics and then switches to it
-vim.keymap.set("n", "<leader>g", function()
-  vim.diagnostic.open_float(nil, { scope = "line", focus = true })
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>w", true, false, true), "n", true)
-end, { desc = "Line Dia[g]nostics" })
+vim.keymap.set('n', '<leader>g', function()
+  vim.diagnostic.open_float(nil, { scope = 'line', focus = true })
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-w>w', true, false, true), 'n', true)
+end, { desc = 'Line Dia[g]nostics' })
 
 -- Opens floating doc of hovered symbol and then switches to it
-vim.keymap.set("n", "<leader>k", function()
+vim.keymap.set('n', '<leader>k', function()
   local params = vim.lsp.util.make_position_params()
   vim.lsp.buf_request(0, 'textDocument/hover', params, function(_, result, ctx, _)
     if result and result.contents then
       local markdown_lines = vim.lsp.util.convert_input_to_markdown_lines(result.contents)
       markdown_lines = vim.lsp.util.trim_empty_lines(markdown_lines)
       if not vim.tbl_isempty(markdown_lines) then
-        local bufnr, winid = vim.lsp.util.open_floating_preview(markdown_lines, "markdown", { border = "single" })
+        local bufnr, winid = vim.lsp.util.open_floating_preview(markdown_lines, 'markdown', { border = 'single' })
         -- focus on the floating window
         vim.api.nvim_set_current_win(winid)
       end
     end
   end)
-end, { desc = "Wi[k]i (Documentation)" })
+end, { desc = 'Wi[k]i (Documentation)' })
 
 -- Selects all lines
 vim.api.nvim_set_keymap('n', '<C-a>', 'ggVG', { noremap = true, silent = true })
@@ -277,10 +278,10 @@ vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower win
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
-vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
-vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
-vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
-vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
+vim.keymap.set('n', '<C-S-h>', '<C-w>H', { desc = 'Move window to the left' })
+vim.keymap.set('n', '<C-S-l>', '<C-w>L', { desc = 'Move window to the right' })
+vim.keymap.set('n', '<C-S-j>', '<C-w>J', { desc = 'Move window to the lower' })
+vim.keymap.set('n', '<C-S-k>', '<C-w>K', { desc = 'Move window to the upper' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -322,11 +323,13 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   {
     'windwp/nvim-autopairs',
-    event = "InsertEnter",
+    event = 'InsertEnter',
     config = true,
     ops = {
-      enabled = function(bufnr) return true end, -- control if auto-pairs should be enabled when attaching to a buffer
-      disable_filetype = { "TelescopePrompt", "spectre_panel", "snacks_picker_input" },
+      enabled = function(bufnr)
+        return true
+      end, -- control if auto-pairs should be enabled when attaching to a buffer
+      disable_filetype = { 'TelescopePrompt', 'spectre_panel', 'snacks_picker_input' },
       disable_in_macro = true, -- disable when recording or executing a macro
       disable_in_visualblock = false, -- disable when insert after visual block mode
       disable_in_replace_mode = true,
@@ -361,7 +364,7 @@ require('lazy').setup({
     opts = {
       suppressed_dirs = { '~/', '~/Projects', '~/Downloads', '/' },
       -- log_level = 'debug',
-    }
+    },
   },
   {
     'mg979/vim-visual-multi',
@@ -549,10 +552,10 @@ require('lazy').setup({
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>sf', function ()
+      vim.keymap.set('n', '<leader>sf', function()
         local ok = pcall(builtin.git_files, { show_untracked = true })
         if not ok then
-          builtin.find_files({ hidden = true })
+          builtin.find_files { hidden = true }
         end
       end, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>st', builtin.builtin, { desc = '[S]earch Select [T]elescope' })
@@ -800,7 +803,7 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         clangd = {},
-        cmake = {},
+        neocmakelsp = {}, -- faster than cmake (rust)
         jinja_lsp = {},
         -- css_variables = {}, -- unofficial (typescript)
         -- docker_compose_language_service = {},
@@ -1164,52 +1167,52 @@ local fn = vim.fn
 
 local delay = 2000 -- ms
 
-local autosave = api.nvim_create_augroup("autosave", { clear = true })
+local autosave = api.nvim_create_augroup('autosave', { clear = true })
 -- Initialization
-api.nvim_create_autocmd("BufRead", {
-    pattern = "*",
-    group = autosave,
-    callback = function(ctx)
-        api.nvim_buf_set_var(ctx.buf, "autosave_queued", false)
-        api.nvim_buf_set_var(ctx.buf, "autosave_block", false)
-    end,
+api.nvim_create_autocmd('BufRead', {
+  pattern = '*',
+  group = autosave,
+  callback = function(ctx)
+    api.nvim_buf_set_var(ctx.buf, 'autosave_queued', false)
+    api.nvim_buf_set_var(ctx.buf, 'autosave_block', false)
+  end,
 })
 
-api.nvim_create_autocmd({ "InsertLeave", "TextChanged" }, {
-    pattern = "*",
-    group = autosave,
-    callback = function(ctx)
-        -- conditions that donnot do autosave
-        local disabled_ft = { "acwrite", "oil" }
-        if
-            not vim.bo.modified
-            or fn.findfile(ctx.file, ".") == "" -- a new file
-            or ctx.file:match("wezterm.lua")
-            or vim.tbl_contains(disabled_ft, vim.bo[ctx.buf].ft)
-        then
-            return
-        end
+api.nvim_create_autocmd({ 'InsertLeave', 'TextChanged' }, {
+  pattern = '*',
+  group = autosave,
+  callback = function(ctx)
+    -- conditions that donnot do autosave
+    local disabled_ft = { 'acwrite', 'oil' }
+    if
+      not vim.bo.modified
+      or fn.findfile(ctx.file, '.') == '' -- a new file
+      or ctx.file:match 'wezterm.lua'
+      or vim.tbl_contains(disabled_ft, vim.bo[ctx.buf].ft)
+    then
+      return
+    end
 
-        local ok, queued = pcall(api.nvim_buf_get_var, ctx.buf, "autosave_queued")
-        if not ok then
-            return
-        end
+    local ok, queued = pcall(api.nvim_buf_get_var, ctx.buf, 'autosave_queued')
+    if not ok then
+      return
+    end
 
-        if not queued then
-            vim.cmd("silent w")
-            api.nvim_buf_set_var(ctx.buf, "autosave_queued", true)
-            vim.notify("Saved at " .. os.date("%H:%M:%S"))
-        end
+    if not queued then
+      vim.cmd 'silent w'
+      api.nvim_buf_set_var(ctx.buf, 'autosave_queued', true)
+      vim.notify('Saved at ' .. os.date '%H:%M:%S')
+    end
 
-        local block = api.nvim_buf_get_var(ctx.buf, "autosave_block")
-        if not block then
-            api.nvim_buf_set_var(ctx.buf, "autosave_block", true)
-            vim.defer_fn(function()
-                if api.nvim_buf_is_valid(ctx.buf) then
-                    api.nvim_buf_set_var(ctx.buf, "autosave_queued", false)
-                    api.nvim_buf_set_var(ctx.buf, "autosave_block", false)
-                end
-            end, delay)
+    local block = api.nvim_buf_get_var(ctx.buf, 'autosave_block')
+    if not block then
+      api.nvim_buf_set_var(ctx.buf, 'autosave_block', true)
+      vim.defer_fn(function()
+        if api.nvim_buf_is_valid(ctx.buf) then
+          api.nvim_buf_set_var(ctx.buf, 'autosave_queued', false)
+          api.nvim_buf_set_var(ctx.buf, 'autosave_block', false)
         end
-    end,
+      end, delay)
+    end
+  end,
 })

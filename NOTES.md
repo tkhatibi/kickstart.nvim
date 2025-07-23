@@ -142,6 +142,7 @@ nvim -u NONE -N
 - I`<C-h>` = `backspace`
 - I`<C-d>` = `delete`
 - I`<C-m>` = `enter`
+- I`<C-u>` = removes all the chars before cursor in the current line
 - I`<C-t>` indents current line forward
 - I`<C-w>` deletes the word before the cursor
 - I`<C-u>` Deletes everything before the cursor on the current line

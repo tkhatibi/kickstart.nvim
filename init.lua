@@ -89,7 +89,7 @@ vim.o.winborder = 'rounded'
 -- Neovide Settings
 vim.g.neovide_cursor_vfx_mode = 'wireframe'
 vim.g.neovide_scale_factor = 1
-vim.o.guifont = 'FiraCode Nerd Font Mono:h11'
+vim.o.guifont = 'FiraCode Nerd Font Mono:h12'
 vim.api.nvim_set_keymap('n', '<C-0>', ':lua vim.g.neovide_scale_factor = 1<CR>', { silent = true, noremap = true })
 vim.api.nvim_set_keymap('n', '<C-=>', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.05<CR>', { silent = true })
 vim.api.nvim_set_keymap('n', '<C-->', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.05<CR>', { silent = true })
@@ -322,6 +322,92 @@ vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   {
+    'MeanderingProgrammer/render-markdown.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+    opts = {},
+  },
+  {
+    'nguyenvukhang/nvim-toggler',
+    config = function()
+      require('nvim-toggler').setup {
+        -- removes the default <leader>i keymap
+        remove_default_keybinds = true,
+        inverses = {
+          ['vim'] = 'emacs',
+        },
+      }
+    end,
+    keys = {
+      {
+        '<leader>Tw',
+        function()
+          require('nvim-toggler').toggle()
+        end,
+        desc = '[T]oggle [W]ord Under Cursor',
+      },
+    },
+  },
+  {
+    'code-biscuits/nvim-biscuits',
+    event = 'BufReadPost', -- or "InsertEnter" depending on when you want it to load
+    config = function()
+      require('nvim-biscuits').setup {
+        keys = {
+          {
+            '<leader>Tc',
+            function()
+              local nvim_biscuits = require 'nvim-biscuits'
+              nvim_biscuits.BufferAttach()
+              nvim_biscuits.toggle_biscuits()
+            end,
+            mode = 'n',
+            desc = '[T]oggle Scope [C]omment',
+          },
+        },
+        show_on_start = true, -- set to false if you want to toggle manually
+        default_config = {
+          max_length = 80,
+          min_distance = 5,
+          prefix_string = '// ',
+        },
+        language_config = {
+          markdown = {
+            disabled = true,
+          },
+          html = {
+            prefix_string = '🌐 ',
+          },
+          python = {
+            prefix_string = '# ',
+          },
+          ruby = {
+            prefix_string = '# ',
+          },
+          r = {
+            prefix_string = '# ',
+          },
+          perl = {
+            prefix_string = '# ',
+          },
+          shell = {
+            prefix_string = '# ',
+          },
+          haskell = {
+            prefix_string = '-- ',
+          },
+          lua = {
+            prefix_string = '-- ',
+          },
+          sql = {
+            prefix_string = '-- ',
+          },
+        },
+      }
+    end,
+  },
+  {
     'windwp/nvim-autopairs',
     event = 'InsertEnter',
     config = true,
@@ -426,6 +512,7 @@ require('lazy').setup({
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     opts = {
+      preset = 'helix',
       -- delay between pressing a key and opening which-key (milliseconds)
       -- this setting is independent of vim.opt.timeoutlen
       delay = 0,
@@ -1118,11 +1205,11 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.

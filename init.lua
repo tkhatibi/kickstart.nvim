@@ -367,19 +367,24 @@ require('lazy').setup({
     config = function()
       require('nvim-toggler').setup {
         -- removes the default <leader>i keymap
-        remove_default_keybinds = true,
+        remove_default_keybinds = false,
         inverses = {
           ['vim'] = 'emacs',
+          ['next'] = 'previous',
+          ['prev'] = 'next',
+          ['above'] = 'below',
+          ['right'] = 'left',
+          ['top'] = 'bottom',
         },
       }
     end,
     keys = {
       {
-        '<leader>Tw',
+        '<leader>i',
         function()
           require('nvim-toggler').toggle()
         end,
-        desc = '[T]oggle [W]ord Under Cursor',
+        desc = '[I]nverse Token Under Cursor',
       },
     },
   },

@@ -218,6 +218,10 @@ vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
 vim.keymap.set('v', '<', '<gv', { desc = 'Indent Left and Reselect' })
 vim.keymap.set('v', '>', '>gv', { desc = 'Indent Right and Reselect' })
 
+-- Shortcuts to open neovim files
+vim.keymap.set('n', '<leader>vc', ':e ~/.config/nvim/init.lua<CR>', { desc = '[V]im [C]onfiguration' })
+vim.keymap.set('n', '<leader>vn', ':e ~/.config/nvim/NOTES.md<CR>', { desc = '[V]im [N]otes' })
+
 -- Lazy Window
 vim.keymap.set('n', '<leader>z', ':Lazy<CR>', { desc = 'La[z]y Window' })
 

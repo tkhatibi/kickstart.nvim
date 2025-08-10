@@ -287,6 +287,11 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+vim.keymap.set('n', '<C-Up>', ':resize +2<CR>', { desc = 'Increase Height of Current Window' })
+vim.keymap.set('n', '<C-Down>', ':resize -2<CR>', { desc = 'Decrease Height of Current Window' })
+vim.keymap.set('n', '<C-Right>', ':vertical resize +2<CR>', { desc = 'Increase Width of Current Window' })
+vim.keymap.set('n', '<C-Left>', ':vertical resize -2<CR>', { desc = 'Decrease Width of Current Window' })
+
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 vim.keymap.set('n', '<C-S-h>', '<C-w>H', { desc = 'Move window to the left' })
 vim.keymap.set('n', '<C-S-l>', '<C-w>L', { desc = 'Move window to the right' })

@@ -335,13 +335,32 @@ vim.opt.rtp:prepend(lazypath)
 --    :Lazy update
 --
 -- NOTE: Here is where you install your plugins.
+
 require('lazy').setup({
   {
-    'MeanderingProgrammer/render-markdown.nvim',
-    dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
-    ---@module 'render-markdown'
-    ---@type render.md.UserConfig
-    opts = {},
+    'OXY2DEV/markview.nvim',
+    lazy = false,
+    config = function()
+      local markview = require 'markview'
+      local presets = require 'markview.presets'
+
+      markview.setup {
+        markdown = {
+          headings = presets.headings.arrowed,
+          horizontal_rules = presets.horizontal_rules.arrowed,
+          tables = presets.tables.single,
+          checkboxes = presets.checkboxes.nerd,
+        },
+        preview = {
+          modes = { 'i', 'n', 'no', 'c' },
+          hybrid_modes = { 'i', 'n' }, -- Enable hybrid mode in normal mode
+          linewise_hybrid_mode = true, -- Show raw markdown for current line
+          edit_range = { 0, 0 }, -- Only the current line
+          icon_provider = 'devicons',
+        },
+      }
+    end,
+    priority = 49, -- For `nvim-treesitter` users.
   },
   {
     'nguyenvukhang/nvim-toggler',

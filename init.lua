@@ -222,6 +222,13 @@ vim.keymap.set('v', '>', '>gv', { desc = 'Indent Right and Reselect' })
 vim.keymap.set('n', '<leader>vc', ':e ~/.config/nvim/init.lua<CR>', { desc = '[V]im [C]onfiguration' })
 vim.keymap.set('n', '<leader>vn', ':e ~/.config/nvim/NOTES.md<CR>', { desc = '[V]im [N]otes' })
 
+-- Copy current file absolute path
+vim.keymap.set('n', '<leader>yp', function()
+  local path = vim.fn.expand '%:p'
+  vim.fn.setreg('+', path)
+  print('file:', path)
+end, { desc = '[Y]anks Current File [P]ath' })
+
 -- Lazy Window
 vim.keymap.set('n', '<leader>z', ':Lazy<CR>', { desc = 'La[z]y Window' })
 

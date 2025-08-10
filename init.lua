@@ -389,64 +389,6 @@ require('lazy').setup({
     },
   },
   {
-    'code-biscuits/nvim-biscuits',
-    event = 'BufReadPost', -- or "InsertEnter" depending on when you want it to load
-    config = function()
-      require('nvim-biscuits').setup {
-        keys = {
-          {
-            '<leader>Tc',
-            function()
-              local nvim_biscuits = require 'nvim-biscuits'
-              nvim_biscuits.BufferAttach()
-              nvim_biscuits.toggle_biscuits()
-            end,
-            mode = 'n',
-            desc = '[T]oggle Scope [C]omment',
-          },
-        },
-        show_on_start = true, -- set to false if you want to toggle manually
-        default_config = {
-          max_length = 80,
-          min_distance = 5,
-          prefix_string = '// ',
-        },
-        language_config = {
-          markdown = {
-            disabled = true,
-          },
-          html = {
-            prefix_string = '🌐 ',
-          },
-          python = {
-            prefix_string = '# ',
-          },
-          ruby = {
-            prefix_string = '# ',
-          },
-          r = {
-            prefix_string = '# ',
-          },
-          perl = {
-            prefix_string = '# ',
-          },
-          shell = {
-            prefix_string = '# ',
-          },
-          haskell = {
-            prefix_string = '-- ',
-          },
-          lua = {
-            prefix_string = '-- ',
-          },
-          sql = {
-            prefix_string = '-- ',
-          },
-        },
-      }
-    end,
-  },
-  {
     'windwp/nvim-autopairs',
     event = 'InsertEnter',
     config = true,

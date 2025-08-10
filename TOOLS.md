@@ -3,6 +3,8 @@
 ```sh
 sudo apt update && sudo apt upgrade -y
 
+sudo apt install libudev-dev libdecor-0-0 -y
+
 # Install nix
 sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --no-daemon
 
@@ -23,6 +25,8 @@ pip install --upgrade cmake
 
 # Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cargo install cargo-expand
+cargo install just
 # TODO: Install clippy
 
 # Install go and its useful packages
@@ -63,4 +67,3 @@ cargo install --git https://github.com/neovide/neovide
 # Install emscripten
 # TODO:
 ```
-

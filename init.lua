@@ -621,9 +621,16 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', function()
-        local ok = pcall(builtin.git_files, { show_untracked = true })
+        local ok = pcall(builtin.git_files, {
+          -- Omitting show_untracked to avoid Git warning when recurse_submodules is enabled
+          -- show_untracked = true,
+          recurse_submodules = true,
+        })
         if not ok then
-          builtin.find_files { hidden = true }
+          builtin.find_files {
+            hidden = true,
+            follow = true, -- follows symlinks, useful for submodules
+          }
         end
       end, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>st', builtin.builtin, { desc = '[S]earch Select [T]elescope' })

@@ -214,6 +214,10 @@ vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' 
 -- Move selected lines up with Alt + k
 vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
 
+-- Better Indenting in Visual Mode
+vim.keymap.set('v', '<', '<gv', { desc = 'Indent Left and Reselect' })
+vim.keymap.set('v', '>', '>gv', { desc = 'Indent Right and Reselect' })
+
 -- Lazy Window
 vim.keymap.set('n', '<leader>z', ':Lazy<CR>', { desc = 'La[z]y Window' })
 

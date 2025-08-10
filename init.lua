@@ -896,7 +896,18 @@ require('lazy').setup({
         -- vacuum = {}, -- openapi 2 and 3 (go)
         -- gopls = {}, -- golang
         -- pyright = {},
-        rust_analyzer = {},
+        rust_analyzer = {
+          settings = {
+            ['rust-analyzer'] = {
+              procMacro = {
+                enable = true,
+              },
+              experimental = {
+                procAttrMacros = true,
+              },
+            },
+          },
+        },
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:

@@ -339,6 +339,14 @@ vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup({
   {
+    'pmizio/typescript-tools.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'neovim/nvim-lspconfig',
+    },
+    opts = {},
+  },
+  {
     'OXY2DEV/markview.nvim',
     lazy = false,
     config = function()

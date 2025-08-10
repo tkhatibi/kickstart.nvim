@@ -232,11 +232,6 @@ end, { desc = '[Y]anks Current File [P]ath' })
 -- Lazy Window
 vim.keymap.set('n', '<leader>z', ':Lazy<CR>', { desc = 'La[z]y Window' })
 
--- Remove all ^M in document
-vim.keymap.set('n', '<leader>m', function()
-  vim.cmd [[%s/\r//g]]
-end, { desc = 'Remove Carriage Returns' })
-
 -- Opens floating window of current line diagnostics and then switches to it
 vim.keymap.set('n', '<leader>g', function()
   vim.diagnostic.open_float(nil, { scope = 'line', focus = true })

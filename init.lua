@@ -145,12 +145,31 @@ require('vim._core.ui2').enable {}
 
 local MiniCompletion = require 'mini.completion'
 
-require 'options'
-require 'keymaps'
-require 'commands'
+local function setup_dependencies()
+    vim.api.nvim_create_user_command("PackAdd", function(opts)
+        vim.pack.add(opts.fargs)
+    end, { nargs = "+", desc = "Add plugins (:PackAdd user/repo1 user2/repo2)" })
+
+    vim.api.nvim_create_user_command("PackDel", function(opts)
+        vim.pack.del(opts.fargs)
+    end, { nargs = "+", desc = "Del plugins (:PackDel user/repo1 user2/repo2)" })
+
+    vim.api.nvim_create_user_command("PackUpdate", function(opts)
+        -- check if any arg is passed
+        if opts.args:match("%S") then
+            -- update specific plugins
+            local plugins = vim.split(opts.args, "%s+", { trimempty = true })
+            -- update only specific plugins
+            vim.pack.update(plugins)
+        else
+            -- updat all
+            vim.pack.update()
+        end
+    end, { nargs = "*", desc = "Update plugins (:PackUpdate user/repo1 user2/repo2)" })
+end
 
 -------------------------------------------------------------
--- PRIMITIVE SETUPS
+-- PRIMITIVES
 -------------------------------------------------------------
 
 local function setup_base()
@@ -174,6 +193,17 @@ local function setup_base()
 
     -- TODO: move below lines to better setup function
 
+    --vim.g.netrw_banner = 0 -- show only files and folders in file explorer
+
+    vim.o.swapfile = false
+    vim.o.backup = false
+
+    vim.opt.isfname:append("@-@")
+
+    vim.o.signcolumn = 'yes'
+
+    vim.o.colorcolumn = "0"
+
     vim.keymap.set('n', '<leader>oh', ':checkhealth<CR>', { noremap = true, desc = 'Health Check' })
     vim.keymap.set('n', '<leader>ou', function()
         vim.cmd.packadd 'nvim.undotree'
@@ -188,27 +218,6 @@ local function setup_base()
     -- BASIC AUTOCOMMANDS
     -------------------------------------------------------------
     --  NOTE `:help lua-guide-autocommands`
-end
-
--------------------------------------------------------------
-
-local function set_theme()
-    if is_dark_theme then
-        vim.cmd.colorscheme(dark_theme)
-    else
-        vim.cmd.colorscheme(light_theme)
-    end
-end
-
-local function setup_theme()
-    set_theme()
-
-    vim.keymap.set('n', '<leader>,t', function()
-        is_dark_theme = not is_dark_theme
-        set_theme()
-    end, { desc = 'Toggle theme' })
-
-    vim.keymap.set('n', '<leader>,T', ':colorscheme', { desc = 'Change theme' })
 end
 
 -------------------------------------------------------------
@@ -477,7 +486,7 @@ end
 local function setup_vim()
     vim.keymap.set('n', '<leader>vc', ':e ~/.config/nvim/init.lua<cr>', { desc = 'configure' })
 
-    vim.keymap.set('n', '<leader>vv', ':wa<cr>:source ~/.config/nvim/init.lua<cr>', { desc = 'source' })
+    vim.keymap.set('n', '<leader>vv', ':w<cr>:source ~/.config/nvim/init.lua<cr>', { desc = 'source' })
 
     vim.keymap.set('n', '<leader>vn', ':e ~/.config/nvim/NOTES.md<cr>', { desc = 'NOTES.md' })
 
@@ -501,13 +510,21 @@ end
 
 -------------------------------------------------------------
 
-local function setup_ui()
+local function set_theme()
+    if is_dark_theme then
+        vim.cmd.colorscheme(dark_theme)
+    else
+        vim.cmd.colorscheme(light_theme)
+    end
+end
+
+local function setup_theme()
     -- [[ CURSOR ]]
     vim.o.mouse = 'a'
     vim.o.guicursor = ''
     vim.o.cursorline = true -- Show which line your cursor is on
 
-    vim.o.showmode = true   -- it's already in the status line
+    vim.o.showmode = false  -- it's already in the status line
     vim.o.laststatus = 3
     -- vim.o.termguicolors = true
 
@@ -532,11 +549,20 @@ local function setup_ui()
     vim.o.list = true
     vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
+    set_theme()
+
     vim.api.nvim_set_keymap('n', '<C-0>', ':lua vim.g.neovide_scale_factor = 1<CR>', { silent = true, noremap = true })
     vim.api.nvim_set_keymap('n', '<C-=>', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.05<CR>',
         { silent = true })
     vim.api.nvim_set_keymap('n', '<C-->', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.05<CR>',
         { silent = true })
+
+    vim.keymap.set('n', '<leader>,t', function()
+        is_dark_theme = not is_dark_theme
+        set_theme()
+    end, { desc = 'Toggle theme' })
+
+    vim.keymap.set('n', '<leader>,T', ':colorscheme ', { desc = 'Change theme' })
 end
 
 -------------------------------------------------------------
@@ -621,6 +647,10 @@ end
 -------------------------------------------------------------
 --- MINI SETUPS
 -------------------------------------------------------------
+
+local function setup_mini_icons()
+    require("mini.icons").setup()
+end
 
 local function setup_mini_notify()
     require("mini.notify").setup {
@@ -744,6 +774,10 @@ local function setup_mini_surround()
     require 'mini.surround'.setup()
 end
 
+local function setup_mini_git()
+    require("mini.git").setup()
+end
+
 -- NOTE `N [h` previous hunk
 -- NOTE `N ]h` next hunk
 -- NOTE `N [H` first hunk
@@ -761,10 +795,29 @@ local function setup_mini_diff()
     vim.keymap.set('n', '<leader>gd', '<cmd>Gvdiffsplit<CR>', { desc = 'Git diff split' })
 end
 
+-- NOTE `[b` goes to previous tab
+-- NOTE `]b` goes toprevious tab
+local function setup_mini_tabline()
+    require("mini.tabline").setup()
+end
+
+local function setup_mini_statusline()
+    local statusline = require('mini.statusline')
+
+    statusline.setup { use_icons = vim.g.have_nerd_font }
+
+    statusline.section_location = function()
+        return '%2l:%-2v/%2L'
+    end
+end
+
+-------------------------------------------------------------
+
 -------------------------------------------------------------
 -- INTEGRATE SETUPS
 -------------------------------------------------------------
 
+setup_dependencies()
 setup_base()
 setup_yank()
 setup_editing()
@@ -773,15 +826,15 @@ setup_buffers()
 setup_search()
 setup_terminal()
 setup_quickfix()
-setup_theme()
 setup_file_management()
 setup_vim()
-setup_ui()
+setup_theme()
 
 setup_treesitter()
 setup_mason()
 setup_lsp()
 
+setup_mini_icons()
 setup_mini_notify()
 setup_mini_files()
 setup_mini_pick()
@@ -790,4 +843,7 @@ setup_mini_cmdline()
 setup_mini_completion()
 setup_mini_snippets()
 setup_mini_surround()
+-- setup_mini_git()
 setup_mini_diff()
+setup_mini_tabline()
+setup_mini_statusline()

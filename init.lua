@@ -174,9 +174,6 @@ local function setup_base()
 
     -- TODO: move below lines to better setup function
 
-    vim.opt.completeopt = 'menuone,noselect,fuzzy,nosort'
-    vim.opt.shortmess:append 'c'
-
     vim.keymap.set('n', '<leader>oh', ':checkhealth<CR>', { noremap = true, desc = 'Health Check' })
     vim.keymap.set('n', '<leader>ou', function()
         vim.cmd.packadd 'nvim.undotree'
@@ -217,9 +214,9 @@ end
 -------------------------------------------------------------
 
 local function setup_search()
-    vim.o.ignorecase = true    -- case-insensitive search
-    vim.o.smartcase = true     -- enable case-sensitive search when uppercased letter is present
-    vim.o.inccommand = 'split' -- preview substitutions live, as you type!
+    vim.o.ignorecase = true        -- case-insensitive search
+    vim.o.smartcase = true         -- enable case-sensitive search when uppercased letter is present
+    vim.o.inccommand = 'split'     -- preview substitutions live, as you type!
 
     -- clear highlights on search when pressing <esc> in normal mode
     --  NOTE `:help hlsearch`
@@ -243,7 +240,7 @@ local function setup_quickfix()
 
     -- Clear and close quickfix list completely
     vim.keymap.set('n', '<leader>cq', function()
-        vim.fn.setqflist({}, 'r') -- replace with empty list
+        vim.fn.setqflist({}, 'r')     -- replace with empty list
         vim.cmd.cclose()
     end, { desc = 'Clear and close whole list' })
 
@@ -262,14 +259,14 @@ local function setup_quickfix()
     -- Delete current line from quickfix list
     vim.keymap.set('n', '<leader>cd', function()
         local qf = vim.fn.getqflist()
-        local idx = vim.fn.line '.' -- current line in quickfix window
+        local idx = vim.fn.line '.'     -- current line in quickfix window
         if vim.bo.filetype ~= 'qf' then
             vim.notify('Open quickfix window and place cursor on the entry to delete', vim.log.levels.WARN)
             return
         end
         table.remove(qf, idx)
         vim.fn.setqflist(qf, 'r')
-        vim.cmd.copen() -- refresh
+        vim.cmd.copen()     -- refresh
     end, { desc = 'Delete current line from list' })
 
     --  NOTE `:help vim.diagnostic.opts`
@@ -280,8 +277,8 @@ local function setup_quickfix()
         underline = { severity = { min = vim.diagnostic.severity.warn } },
 
         -- Can switch between these as you prefer
-        virtual_text = false,  -- Text shows up at the end of the line
-        virtual_lines = false, -- Text shows up underneath the line, with virtual lines
+        virtual_text = false,      -- Text shows up at the end of the line
+        virtual_lines = false,     -- Text shows up underneath the line, with virtual lines
 
         -- Auto open the float, so you can easily read the errors when jumping with `[d` and `]d`
         jump = {
@@ -409,7 +406,7 @@ local function setup_editing()
     -- NOTE `:help 'confirm'`
     vim.o.confirm = true
 
-    vim.o.undofile = true -- Enable undo/redo changes even after closing and reopening a file
+    vim.o.undofile = true     -- Enable undo/redo changes even after closing and reopening a file
 
     vim.api.nvim_set_keymap('n', '<c-a>', 'ggVG', { noremap = true, silent = true, desc = 'Select All Lines' })
 
@@ -479,29 +476,13 @@ end
 local function setup_vim()
     vim.keymap.set('n', '<leader>vc', ':e ~/.config/nvim/init.lua<cr>', { desc = 'configure' })
 
-    -- vim.keymap.set('n', '<leader>vv', ':wa<cr>:source ~/.config/nvim/init.lua<cr>', { desc = 'source' })
+    vim.keymap.set('n', '<leader>vv', ':wa<cr>:source ~/.config/nvim/init.lua<cr>', { desc = 'source' })
 
     vim.keymap.set('n', '<leader>vn', ':e ~/.config/nvim/NOTES.md<cr>', { desc = 'NOTES.md' })
 
     vim.keymap.set('n', '<leader>vt', ':e ~/.config/nvim/TOOLS.md<cr>', { desc = 'TOOLS.md' })
 
     vim.keymap.set('n', '<leader>vu', ':packupdate<cr>', { desc = 'update' })
-
-    vim.keymap.set('n', '<leader>vv', function()
-        -- write all modified buffers first
-        vim.cmd 'wa'
-
-        -- clear the neovim/lua module cache for your custom config files
-        for name, _ in pairs(package.loaded) do
-            if name:match '^user' or name:match '^config' or name:match '^plugins' then package.loaded[name] = nil end
-        end
-
-        -- source the main init.lua
-        vim.cmd 'source ~/.config/nvim/init.lua'
-        vim.cmd 'source %'
-        vim.cmd 'so'
-        print 'config reloaded!'
-    end, { desc = 'reload neovim config' })
 end
 
 -------------------------------------------------------------
@@ -725,6 +706,9 @@ local function setup_mini_cmdline()
 end
 
 local function setup_mini_completion()
+    vim.opt.completeopt = 'menuone,noselect,fuzzy,nosort'
+    vim.opt.shortmess:append 'c'
+
     MiniCompletion.setup {
         lsp_completion = {
             auto_setup = true,

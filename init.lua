@@ -8,8 +8,8 @@
 
 local is_dark_theme = true
 
--- local light_theme = "peachpuff"
-local light_theme = 'shine'
+-- local light_theme = 'shine'
+local light_theme = "peachpuff"
 
 -- local dark_theme = "slate"
 -- local dark_theme = "retrobox"
@@ -144,20 +144,13 @@ vim.pack.add {
 require('vim._core.ui2').enable {}
 
 local MiniCompletion = require 'mini.completion'
-local MiniSnippets = require 'mini.snippets'
-local MiniExtra = require 'mini.extra'
-local MiniNotify = require 'mini.notify'
-local MiniCmdline = require 'mini.cmdline'
-local MiniSurround = require 'mini.surround'
-local MiniFiles = require 'mini.files'
-local MiniPick = require 'mini.pick'
 
 require 'options'
 require 'keymaps'
 require 'commands'
 
 -------------------------------------------------------------
--- SETUPS
+-- PRIMITIVE SETUPS
 -------------------------------------------------------------
 
 local function setup_base()
@@ -217,6 +210,8 @@ local function setup_theme()
         is_dark_theme = not is_dark_theme
         set_theme()
     end, { desc = 'Toggle theme' })
+
+    vim.keymap.set('n', '<leader>,T', ':colorscheme', { desc = 'Change theme' })
 end
 
 -------------------------------------------------------------
@@ -236,17 +231,6 @@ local function setup_search()
     -- TODO: fix it
     vim.keymap.set('n', '<C-8>', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
         { desc = 'Replace word under cursor' })
-end
-
-local function setup_search_for_mini_pick()
-    vim.keymap.set('n', '<leader>sw', function() MiniPick.builtin.grep { pattern = vim.fn.expand '<cword>' } end,
-        { desc = 'Search word under cursor' })
-
-    vim.keymap.set('n', '<leader>sh', function() MiniPick.builtin.help() end, { desc = 'Search helps' })
-end
-
-local function setup_search_for_mini_extra()
-    vim.keymap.set('n', '<leader>sk', function() MiniExtra.pickers.keymaps() end, { desc = 'Search keymaps' })
 end
 
 -------------------------------------------------------------
@@ -296,7 +280,7 @@ local function setup_quickfix()
         underline = { severity = { min = vim.diagnostic.severity.warn } },
 
         -- Can switch between these as you prefer
-        virtual_text = true,   -- Text shows up at the end of the line
+        virtual_text = false,  -- Text shows up at the end of the line
         virtual_lines = false, -- Text shows up underneath the line, with virtual lines
 
         -- Auto open the float, so you can easily read the errors when jumping with `[d` and `]d`
@@ -312,28 +296,11 @@ local function setup_quickfix()
     }
 end
 
-local function setup_quickfix_for_mini_extra()
-    vim.keymap.set('n', '<leader>sd', function() MiniExtra.pickers.diagnostic() end, { desc = 'Search diagnostics' })
-end
-
 -------------------------------------------------------------
 
 local function setup_file_management()
     vim.keymap.set('n', '<leader>ox', ':e .<CR>',
         { noremap = true, desc = 'Default file explorer' })
-end
-
-local function setup_file_management_for_mini_files()
-    vim.keymap.set('n', '.', '<cmd>lua MiniFiles.open()<CR>', { desc = 'Mini file explorer' })
-
-    vim.keymap.set('n', '<C-.>', function()
-        MiniFiles.open(vim.api.nvim_buf_get_name(0), false)
-        MiniFiles.reveal_cwd()
-    end, { desc = 'Toggle into currently open file' })
-end
-
-local function setup_file_management_for_mini_pick()
-    vim.keymap.set('n', '<leader>oo', function() MiniPick.builtin.files() end, { desc = 'Pick file' })
 end
 
 -------------------------------------------------------------
@@ -591,6 +558,8 @@ local function setup_ui()
 end
 
 -------------------------------------------------------------
+--- TREESITTER, MASON, AND LSP SETUPS
+-------------------------------------------------------------
 
 local function setup_treesitter()
     local treesitter = require 'nvim-treesitter'
@@ -667,9 +636,11 @@ local function setup_lsp()
 end
 
 -------------------------------------------------------------
+--- MINI SETUPS
+-------------------------------------------------------------
 
-local function setup_mini()
-    MiniNotify.setup {
+local function setup_mini_notify()
+    require("mini.notify").setup {
         -- Content management
         content = {
             -- Function which formats the notification message
@@ -693,21 +664,10 @@ local function setup_mini()
             duration_last = 1000,
         },
     }
+end
 
-    -- Command Line Completion
-    MiniCmdline.setup {
-        autocorrect = { enable = false },
-    }
-
-    -- NOTE `sr'"` replaces ' with "
-    -- NOTE `sd"` deletes surrounding (")
-    -- NOTE `viwsa'` surrounds selected with `'`
-    -- NOTE `viwsatp className="m2"<CR>` surrounds selected with `<p className="m2">` and `</p>`
-    -- NOTE `srtth3<CR>` replaces p tag with h3
-    -- NOTE `srtb` deletes tags around and surrounds with ()
-    -- NOTE `srb{` deletes () around and surrounds with {}
-    -- NOTE `sd{` deletes {} around
-    MiniSurround.setup()
+local function setup_mini_files()
+    local MiniFiles = require 'mini.files'
 
     MiniFiles.setup {
         mappings = {
@@ -724,47 +684,78 @@ local function setup_mini()
         },
     }
 
+    vim.keymap.set('n', '.', '<cmd>lua MiniFiles.open()<CR>', { desc = 'Mini file explorer' })
+
+    vim.keymap.set('n', '<C-.>', function()
+        MiniFiles.open(vim.api.nvim_buf_get_name(0), false)
+        MiniFiles.reveal_cwd()
+    end, { desc = 'Toggle into currently open file' })
+end
+
+local function setup_mini_pick()
+    local MiniPick = require 'mini.pick'
+
     MiniPick.setup()
+
+    vim.keymap.set('n', '<leader>sw', function() MiniPick.builtin.grep { pattern = vim.fn.expand '<cword>' } end,
+        { desc = 'Search word under cursor' })
+
+    vim.keymap.set('n', '<leader>ob', function() MiniPick.builtin.buffers() end, { desc = 'Open buffer' })
+
+    vim.keymap.set('n', '<leader>oo', function() MiniPick.builtin.files() end, { desc = 'Open file' })
+
+    vim.keymap.set('n', '<leader>sh', function() MiniPick.builtin.help() end, { desc = 'Search helps' })
+end
+
+local function setup_mini_extra()
+    local MiniExtra = require 'mini.extra'
 
     MiniExtra.setup()
 
+    vim.keymap.set('n', '<leader>sk', function() MiniExtra.pickers.keymaps() end, { desc = 'Search keymaps' })
+
+    vim.keymap.set('n', '<leader>sd', function() MiniExtra.pickers.diagnostic() end,
+        { desc = 'Search diagnostics (workspace)' })
+end
+
+local function setup_mini_cmdline()
+    require('mini.cmdline').setup {
+        autocorrect = { enable = false },
+    }
+end
+
+local function setup_mini_completion()
     MiniCompletion.setup {
         lsp_completion = {
             auto_setup = true,
-            process_time = function(items, base)
-                return MiniCompletion.default_process_items(items, base, {
-                    filtersort = 'fuzzy',
-                })
-            end,
         },
     }
+end
 
-    -- NOTE `<C-l>` jumps to next placeholder
-    -- NOTE `<C-h>` jumps to prev placeholder
+-- NOTE `<C-l>` jumps to next placeholder
+-- NOTE `<C-h>` jumps to prev placeholder
+local function setup_mini_snippets()
+    local MiniSnippets = require 'mini.snippets'
+
     MiniSnippets.setup {
         snippets = {
             MiniSnippets.gen_loader.from_lang(), -- loads friendly-snippets automatically
         },
-        expand = {
-            insert = function(snippet) MiniSnippets.default_insert(snippet, { empty_tabstop = '' }) end,
-        },
     }
-    MiniSnippets.start_lsp_server { match = false }
-    vim.api.nvim_create_autocmd('ColorScheme', {
-        callback = function()
-            vim.api.nvim_set_hl(0, 'MiniSnippetsCurrent', {})
-            vim.api.nvim_set_hl(0, 'MiniSnippetsCurrentReplace', {})
-            vim.api.nvim_set_hl(0, 'MiniSnippetsFinal', {})
-            vim.api.nvim_set_hl(0, 'MiniSnippetsUnvisited', {})
-            vim.api.nvim_set_hl(0, 'MiniSnippetsVisited', {})
-        end,
-    })
 
-    setup_file_management_for_mini_files()
-    setup_file_management_for_mini_pick()
-    setup_search_for_mini_pick()
-    setup_search_for_mini_extra()
-    setup_quickfix_for_mini_extra()
+    MiniSnippets.start_lsp_server { match = false }
+end
+
+-- NOTE `sr'"` replaces ' with "
+-- NOTE `sd"` deletes surrounding (")
+-- NOTE `viwsa'` surrounds selected with `'`
+-- NOTE `viwsatp className="m2"<CR>` surrounds selected with `<p className="m2">` and `</p>`
+-- NOTE `srtth3<CR>` replaces p tag with h3
+-- NOTE `srtb` deletes tags around and surrounds with ()
+-- NOTE `srb{` deletes () around and surrounds with {}
+-- NOTE `sd{` deletes {} around
+local function setup_mini_surround()
+    require 'mini.surround'.setup()
 end
 
 -- NOTE `N [h` previous hunk
@@ -805,5 +796,12 @@ setup_treesitter()
 setup_mason()
 setup_lsp()
 
-setup_mini()
+setup_mini_notify()
+setup_mini_files()
+setup_mini_pick()
+setup_mini_extra()
+setup_mini_cmdline()
+setup_mini_completion()
+setup_mini_snippets()
+setup_mini_surround()
 setup_mini_diff()

@@ -273,8 +273,10 @@ end
 
 local function setup_terminal()
     setup_after("primitives", function()
-        vim.keymap.set('n', '<leader>ot', '<C-w>v:terminal<CR>', { noremap = true, silent = true, desc = 'Open terminal' })
-        vim.keymap.set('n', '<leader>oT', '<C-w>s:terminal<CR>', { noremap = true, silent = true, desc = 'Open terminal below' })
+        vim.keymap.set('n', '<leader>ott', ':terminal<CR>', { noremap = true, silent = true, desc = 'Open terminal here' })
+        vim.keymap.set('n', '<leader>otT', '<C-w>v<C-w>T:terminal<CR>', { noremap = true, silent = true, desc = 'Open terminal in new tab' })
+        vim.keymap.set('n', '<leader>otl', '<C-w>v:terminal<CR>', { noremap = true, silent = true, desc = 'Open terminal right' })
+        vim.keymap.set('n', '<leader>otj', '<C-w>s:terminal<CR>', { noremap = true, silent = true, desc = 'Open terminal below' })
 
         -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
         -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which

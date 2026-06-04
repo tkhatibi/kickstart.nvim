@@ -767,6 +767,12 @@ local function setup_mini()
     setup_quickfix_for_mini_extra()
 end
 
+-- NOTE `N [h` previous hunk
+-- NOTE `N ]h` next hunk
+-- NOTE `N [H` first hunk
+-- NOTE `N ]H` last hunk
+-- NOTE `V gh` stage hunk
+-- NOTE `V gH` reset hunk
 local function setup_mini_diff()
     local MiniDiff = require("mini.diff")
 
@@ -774,13 +780,8 @@ local function setup_mini_diff()
         source = MiniDiff.gen_source.git({ index = false })
     })
 
-    -- NOTE `[H` first hunk
-    -- NOTE `]H` last hunk
-    -- NOTE `gh` stage hunk
-    -- NOTE `gH` reset hunk
-
-    vim.keymap.set('n', '[h', function() MiniDiff.goto_hunk("prev") end, { desc = "Previous hunk" })
-    vim.keymap.set('n', ']h', function() MiniDiff.goto_hunk("next") end, { desc = "Next hunk" })
+    vim.keymap.set('n', '<leader>gg', '<cmd>tabnew | Git | only<cr>', { desc = 'Open fugitive tab' })
+    vim.keymap.set('n', '<leader>gd', '<cmd>Gvdiffsplit<CR>', { desc = 'Git diff split' })
 end
 
 -------------------------------------------------------------

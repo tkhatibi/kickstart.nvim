@@ -733,6 +733,8 @@ local function setup_mini_pick()
 
     MiniPick.setup()
 
+    vim.keymap.set('n', '<leader>p', ':Pick ', { desc = 'Pick' })
+
     vim.keymap.set('n', '<leader>sw', function() MiniPick.builtin.grep { pattern = vim.fn.expand '<cword>' } end,
         { desc = 'Search word under cursor' })
 

@@ -815,7 +815,10 @@ local function setup_mini_diff()
     })
 
     vim.keymap.set('n', '<leader>gg', '<cmd>tabnew | Git | only<cr>', { desc = 'Open fugitive tab' })
+
     vim.keymap.set('n', '<leader>gd', '<cmd>Gvdiffsplit<CR>', { desc = 'Git diff split' })
+
+    vim.keymap.set('n', '<leader>gc', ':!git commit -m ""<Left>', { desc = 'Commit staged files' })
 end
 
 -- NOTE `[b` goes to previous tab

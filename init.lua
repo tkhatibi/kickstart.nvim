@@ -1,6 +1,9 @@
 -- NOTE `:reset` and `ZR` reset neovim
 -- NOTE `:PackAdd https://github.com/bluz71/vim-moonfly-colors`
 -- NOTE `:PackDel https://github.com/bluz71/vim-moonfly-colors`
+-- NOTE `viw`
+--   - following `an`s selects outer scope
+--   - following `in`s selects inner scope
 
 -------------------------------------------------------------
 -- SETTINGS
@@ -143,6 +146,7 @@ vim.pack.add {
     'https://github.com/tpope/vim-fugitive',
 }
 
+-- NOTE `g<` jumps to commandline output
 require('vim._core.ui2').enable {}
 
 local MiniCompletion = require 'mini.completion'
@@ -303,13 +307,6 @@ local function setup_quickfix()
             end,
         },
     }
-end
-
--------------------------------------------------------------
-
-local function setup_file_management()
-    vim.keymap.set('n', '<leader>ox', ':e .<CR>',
-        { noremap = true, desc = 'Default file explorer' })
 end
 
 -------------------------------------------------------------
@@ -523,7 +520,8 @@ end
 local function setup_theme()
     -- [[ CURSOR ]]
     vim.o.mouse = 'a'
-    vim.o.guicursor = ''
+    -- NOTE `h 'guicursor'`
+    vim.o.guicursor = 'n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175'
     vim.o.cursorline = true -- Show which line your cursor is on
 
     vim.o.showmode = false  -- it's already in the status line
@@ -854,7 +852,6 @@ setup_buffers()
 setup_search()
 setup_terminal()
 setup_quickfix()
-setup_file_management()
 setup_vim()
 setup_theme()
 

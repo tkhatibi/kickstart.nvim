@@ -6,6 +6,8 @@
 -- SETTINGS
 -------------------------------------------------------------
 
+local animate = true
+
 local is_dark_theme = true
 
 -- local light_theme = 'shine'
@@ -652,6 +654,27 @@ local function setup_mini_icons()
     require("mini.icons").setup()
 end
 
+local function setup_mini_animate()
+    local MiniAnimate = require("mini.animate")
+
+    local setup_animate = function()
+        MiniAnimate.setup({
+            cursor = { enable = animate },
+            scroll = { enable = false },
+            resize = { enable = animate },
+            open = { enable = animate },
+            close = { enable = animate },
+        })
+    end
+
+    setup_animate()
+
+    vim.keymap.set('n', '<leader>,a', function()
+        animate = not animate
+        setup_animate()
+    end, { desc = 'Toggle animation' })
+end
+
 local function setup_mini_notify()
     require("mini.notify").setup {
         -- Content management
@@ -764,8 +787,8 @@ end
 
 -- NOTE `sr'"` replaces ' with "
 -- NOTE `sd"` deletes surrounding (")
--- NOTE `viwsa'` surrounds selected with `'`
--- NOTE `viwsatp className="m2"<CR>` surrounds selected with `<p className="m2">` and `</p>`
+-- NOTE `viwsa'` or `saiw'` surrounds selected with `'`
+-- NOTE `saiwtp className="m2"<CR>` surrounds selected with `<p className="m2">` and `</p>`
 -- NOTE `srtth3<CR>` replaces p tag with h3
 -- NOTE `srtb` deletes tags around and surrounds with ()
 -- NOTE `srb{` deletes () around and surrounds with {}
@@ -835,6 +858,7 @@ setup_mason()
 setup_lsp()
 
 setup_mini_icons()
+setup_mini_animate()
 setup_mini_notify()
 setup_mini_files()
 setup_mini_pick()

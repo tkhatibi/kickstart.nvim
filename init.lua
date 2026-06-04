@@ -214,9 +214,9 @@ end
 -------------------------------------------------------------
 
 local function setup_search()
-    vim.o.ignorecase = true        -- case-insensitive search
-    vim.o.smartcase = true         -- enable case-sensitive search when uppercased letter is present
-    vim.o.inccommand = 'split'     -- preview substitutions live, as you type!
+    vim.o.ignorecase = true    -- case-insensitive search
+    vim.o.smartcase = true     -- enable case-sensitive search when uppercased letter is present
+    vim.o.inccommand = 'split' -- preview substitutions live, as you type!
 
     -- clear highlights on search when pressing <esc> in normal mode
     --  NOTE `:help hlsearch`
@@ -225,8 +225,9 @@ local function setup_search()
     vim.keymap.set('n', 'n', 'nzzzv', { desc = 'Next search result with cursor centered' })
     vim.keymap.set('n', 'N', 'Nzzzv', { desc = 'Previous search result with cursor centered' })
 
-    -- TODO: fix it
-    vim.keymap.set('n', '<C-8>', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+    vim.keymap.set('n', '<leader>rr', [[:%s//gc<Left><Left><Left>]], { desc = 'Replace' })
+
+    vim.keymap.set('n', '<leader>rw', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gc<Left><Left><Left>]],
         { desc = 'Replace word under cursor' })
 end
 
@@ -240,7 +241,7 @@ local function setup_quickfix()
 
     -- Clear and close quickfix list completely
     vim.keymap.set('n', '<leader>cq', function()
-        vim.fn.setqflist({}, 'r')     -- replace with empty list
+        vim.fn.setqflist({}, 'r') -- replace with empty list
         vim.cmd.cclose()
     end, { desc = 'Clear and close whole list' })
 
@@ -259,14 +260,14 @@ local function setup_quickfix()
     -- Delete current line from quickfix list
     vim.keymap.set('n', '<leader>cd', function()
         local qf = vim.fn.getqflist()
-        local idx = vim.fn.line '.'     -- current line in quickfix window
+        local idx = vim.fn.line '.' -- current line in quickfix window
         if vim.bo.filetype ~= 'qf' then
             vim.notify('Open quickfix window and place cursor on the entry to delete', vim.log.levels.WARN)
             return
         end
         table.remove(qf, idx)
         vim.fn.setqflist(qf, 'r')
-        vim.cmd.copen()     -- refresh
+        vim.cmd.copen() -- refresh
     end, { desc = 'Delete current line from list' })
 
     --  NOTE `:help vim.diagnostic.opts`
@@ -277,8 +278,8 @@ local function setup_quickfix()
         underline = { severity = { min = vim.diagnostic.severity.warn } },
 
         -- Can switch between these as you prefer
-        virtual_text = false,      -- Text shows up at the end of the line
-        virtual_lines = false,     -- Text shows up underneath the line, with virtual lines
+        virtual_text = false,  -- Text shows up at the end of the line
+        virtual_lines = false, -- Text shows up underneath the line, with virtual lines
 
         -- Auto open the float, so you can easily read the errors when jumping with `[d` and `]d`
         jump = {
@@ -406,7 +407,7 @@ local function setup_editing()
     -- NOTE `:help 'confirm'`
     vim.o.confirm = true
 
-    vim.o.undofile = true     -- Enable undo/redo changes even after closing and reopening a file
+    vim.o.undofile = true -- Enable undo/redo changes even after closing and reopening a file
 
     vim.api.nvim_set_keymap('n', '<c-a>', 'ggVG', { noremap = true, silent = true, desc = 'Select All Lines' })
 
@@ -570,7 +571,8 @@ local function setup_mason()
     -- NOTE: press `i` on each LSP to be installed
     vim.keymap.set('n', '<leader>mm', ':Mason<CR>', { noremap = true, desc = 'Open mason window' })
     vim.keymap.set('n', '<leader>mi', ':MasonInstall ', { noremap = true, desc = 'Mason install' })
-    vim.keymap.set('n', '<leader>mp', ':lua print(vim.fn.exepath("', { noremap = true, desc = 'See installed lsp path' })
+    vim.keymap.set('n', '<leader>mp', ':lua print(vim.fn.exepath(""))<Left><Left><Left>',
+        { noremap = true, desc = 'See installed lsp path' })
 end
 
 -- NOTE `:h lsp`

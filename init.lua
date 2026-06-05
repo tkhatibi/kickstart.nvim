@@ -588,8 +588,6 @@ local function setup_editing()
 
     nmap('<A-o>', 'mzo<Esc>`z', 'Add blank line below staying here')
     nmap('<A-S-o>', 'mzO<Esc>`z', 'Add blank line above staying here')
-    nmap('<S-CR>', 'O<Esc>', 'Add blank line above and go there')
-    nmap('<CR>', 'o<Esc>', 'Add blank line below and go there')
 
     nmap('<A-j>', 'mz:m+1<CR>`z==', 'Move line down')
     imap('<A-j>', '<Esc>:m +1<CR>gi', 'Move line down')
@@ -920,6 +918,7 @@ end
 -- NOTE `sd{` deletes {} around
 local function setup_mini_surround() require('mini.surround').setup() end
 
+-- NOTE `<CR>` to see the shortcuts and then press them
 local function setup_mini_jump() require('mini.jump2d').setup() end
 
 local function setup_mini_git() require('mini.git').setup() end

@@ -920,6 +920,8 @@ end
 -- NOTE `sd{` deletes {} around
 local function setup_mini_surround() require('mini.surround').setup() end
 
+local function setup_mini_jump() require('mini.jump2d').setup() end
+
 local function setup_mini_git() require('mini.git').setup() end
 
 -- NOTE `[h` previous hunk
@@ -931,9 +933,7 @@ local function setup_mini_git() require('mini.git').setup() end
 local function setup_mini_diff()
     local MiniDiff = require 'mini.diff'
 
-    MiniDiff.setup {
-        source = MiniDiff.gen_source.git { index = false },
-    }
+    MiniDiff.setup { source = MiniDiff.gen_source.git {} }
 
     nmap('<leader>gg', '<cmd>tabnew | Git | only<cr>', 'Open fugitive tab')
 
@@ -961,8 +961,6 @@ end
 -------------------------------------------------------------
 --- OTHER SETUPS
 -------------------------------------------------------------
-
-local function setup_multi_cursor() require('visual_multi').setup() end
 
 -------------------------------------------------------------
 -- INTEGRATE SETUPS
@@ -996,10 +994,8 @@ setup_mini_cmdline()
 setup_mini_completion()
 setup_mini_snippets()
 setup_mini_surround()
+setup_mini_jump()
 -- setup_mini_git()
 setup_mini_diff()
 setup_mini_tabline()
 setup_mini_statusline()
-
-setup_multi_cursor()
-

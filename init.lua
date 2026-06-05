@@ -1,4 +1,5 @@
 -- NOTE `:bd` deletes buffer
+-- NOTE `:za` toggles fold
 -- NOTE `viw`
 --   - following `an`s selects outer scope
 --   - following `in`s selects inner scope
@@ -302,29 +303,66 @@ end
 -- HELPER FUNCTIONS
 -------------------------------------------------------------
 
-local silent = true
-local expr = true
+local i = 'i'
+local n = 'n'
+local t = 't'
+local v = 'v'
+local x = 'x'
+local noremap = 'noremap'
+local nowait = 'nowait'
+local silent = 'silent'
+local script = 'script'
+local unique = 'unique'
+local expr = 'expr'
 
-local function map(modes, lhs, rhs, desc, noremap, silent, expr)
-    vim.keymap.set(modes, lhs, rhs, {
-        desc = desc,
-        noremap = noremap,
-        silent = silent,
-        expr = expr,
-    })
+local function map(lhs, rhs, desc, ...)
+    local modes = {}
+    local opts = { desc = desc }
+
+    -- Iterate through our collected arguments
+    for _, value in ipairs({ ... }) do
+        if value == silent then
+            opts.silent = true
+        elseif value == expr then
+            opts.expr = true
+        elseif value == noremap then
+            opts.noremap = true
+        elseif value == script then
+            opts.script = true
+        elseif value == unique then
+            opts.unique = true
+        elseif value == nowait then
+            opts.nowait = true
+        elseif value == i then
+            modes[#modes + 1] = i
+        elseif value == n then
+            modes[#modes + 1] = n
+        elseif value == t then
+            modes[#modes + 1] = t
+        elseif value == v then
+            modes[#modes + 1] = v
+        elseif value == x then
+            modes[#modes + 1] = x
+        elseif type(value) == 'table' then
+            for k, val in pairs(value) do
+                opts[k] = val
+            end
+        end
+    end
+    vim.keymap.set(modes, lhs, rhs, opts)
 end
 
-local function imap(l, r, d, s, x) map('i', l, r, d, false, s, x) end
-local function nmap(l, r, d, s, x) map('n', l, r, d, false, s, x) end
-local function tmap(l, r, d, s, x) map('t', l, r, d, false, s, x) end
-local function vmap(l, r, d, s, x) map('v', l, r, d, false, s, x) end
-local function xmap(l, r, d, s, x) map('x', l, r, d, false, s, x) end
+local function imap(l, r, d, ...) map(l, r, d, i, ...) end
+local function nmap(l, r, d, ...) map(l, r, d, n, ...) end
+local function tmap(l, r, d, ...) map(l, r, d, t, ...) end
+local function vmap(l, r, d, ...) map(l, r, d, v, ...) end
+local function xmap(l, r, d, ...) map(l, r, d, x, ...) end
 
-local function inoremap(l, r, d, s, x) map('i', l, r, d, true, s, x) end
-local function nnoremap(l, r, d, s, x) map('n', l, r, d, true, s, x) end
-local function tnoremap(l, r, d, s, x) map('t', l, r, d, true, s, x) end
-local function vnoremap(l, r, d, s, x) map('v', l, r, d, true, s, x) end
-local function xnoremap(l, r, d, s, x) map('x', l, r, d, true, s, x) end
+local function inoremap(l, r, d, ...) map(l, r, d, i, noremap, ...) end
+local function nnoremap(l, r, d, ...) map(l, r, d, n, noremap, ...) end
+local function tnoremap(l, r, d, ...) map(l, r, d, t, noremap, ...) end
+local function vnoremap(l, r, d, ...) map(l, r, d, v, noremap, ...) end
+local function xnoremap(l, r, d, ...) map(l, r, d, x, noremap, ...) end
 
 -------------------------------------------------------------
 -- PRIMITIVES
@@ -592,7 +630,7 @@ end
 local function setup_vim()
     nmap('<leader>vc', ':e ~/.config/nvim/init.lua<cr>', 'configure')
 
-    nmap('<leader>vv', ':w<cr>:source ~/.config/nvim/init.lua<cr>', 'source')
+    nmap('<leader>vv', ':w<cr>:source ~/.config/nvim/init.lua<cr><Esc>', 'source')
 
     nmap('<leader>vn', ':e ~/.config/nvim/NOTES.md<cr>', 'NOTES.md')
 

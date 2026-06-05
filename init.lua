@@ -605,6 +605,8 @@ end
 
 -- NOTE `:help wincmd` for a list of all window commands
 local function setup_buffers()
+  nmap('<leader>w', ':lua vim.lsp.buf.format()<CR>:w<CR>', 'Switch buffer')
+
   nmap('<leader><leader>', '<C-6>', 'Switch buffer')
 
   nmap('<C-w>t', ':tabe %<CR>', 'Copy into a new tab')
@@ -931,7 +933,7 @@ local function setup_mini_git() require('mini.git').setup() end
 local function setup_mini_diff()
   local MiniDiff = require 'mini.diff'
 
-  MiniDiff.setup { }
+  MiniDiff.setup {}
 
   nmap('<leader>gg', '<cmd>tabnew | Git | only<cr>', 'Open fugitive tab')
 

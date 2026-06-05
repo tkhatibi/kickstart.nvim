@@ -371,29 +371,25 @@ local function setup_yank()
     vim.keymap.set('v', 'p', 'P')
     vim.keymap.set('v', 'P', 'p')
 
-    -- Yank only the filename (e.g., "main.lua")
     vim.keymap.set('n', '<leader>yn', function()
         vim.fn.setreg('+', vim.fn.expand '%:t')
         print('Yanked filename: ' .. vim.fn.expand '%:t')
     end, { desc = 'Yank File Name' })
 
-    -- Yank relative file path (e.g., "src/main.lua")
     vim.keymap.set('n', '<leader>yp', function()
         vim.fn.setreg('+', vim.fn.expand '%:.')
         print('Yanked relative path: ' .. vim.fn.expand '%:.')
     end, { desc = 'Yank Relative File Path' })
 
-    -- Yank absolute file path (e.g., "/home/user/project/src/main.lua")
     vim.keymap.set('n', '<leader>yP', function()
         vim.fn.setreg('+', vim.fn.expand '%:p')
         print('Yanked absolute path: ' .. vim.fn.expand '%:p')
     end, { desc = 'Yank Absolute File Path' })
 
-    -- Yank whole content
     vim.keymap.set('n', '<leader>yy', 'mzggVGy`z', { noremap = true, silent = true, desc = 'Yank whole content' })
 
-    -- TODO: Yank status bar message
-    vim.keymap.set('n', '<leader>ys', '', { noremap = true, silent = true, desc = 'Yank status bar message' })
+    -- FIXME
+    vim.keymap.set('n', '<leader>yc', 'g<ggVGy:q<CR>', { desc = 'Yank cmdline message' })
 end
 
 -------------------------------------------------------------

@@ -143,7 +143,7 @@ vim.g.maplocalleader = ' '
 vim.o.backspace = "indent,eol,start" -- better backspace behaviour
 vim.o.updatetime = 1000              -- Decrease update time
 vim.o.timeoutlen = 1000              -- Decrease mapped sequence wait time
-vim.o.ttimeoutlen = 50             -- key code timeout
+vim.o.ttimeoutlen = 50               -- key code timeout
 
 -- [[ CURSOR, MOUSE, SOUNDS ]]
 -- NOTE `h 'guicursor'`
@@ -335,6 +335,19 @@ end
 
 -------------------------------------------------------------
 
+local function setup_toggles()
+    vim.keymap.set('n', '<leader>,w', ':set wrap!<CR>', { desc = 'Toggle line wrap' })
+
+    -- TODO: Toggle comment
+    vim.keymap.set('v', '<C-/>', ':echo "comment"', { desc = 'Toggle comment' })
+
+    -- TODO: toggle `<C-w>m`
+    vim.keymap.set('n', '<C-w>m', '<C-w>|<C-w>_', { desc = 'Max Out' })
+    vim.keymap.set('n', '<C-w>e', '<C-w>=', { desc = 'Equally high and width' })
+end
+
+-------------------------------------------------------------
+
 local function setup_search()
     -- clear highlights on search when pressing <esc> in normal mode
     --  NOTE `:help hlsearch`
@@ -511,9 +524,6 @@ local function setup_editing()
 
     vim.keymap.set('v', '<', '<gv', { desc = 'Indent Left and Reselect' })
     vim.keymap.set('v', '>', '>gv', { desc = 'Indent Right and Reselect' })
-
-    -- TODO: Toggle comment
-    vim.keymap.set('v', '<C-/>', ':echo "comment"', { desc = 'Toggle comment' })
 end
 
 -------------------------------------------------------------
@@ -545,10 +555,6 @@ local function setup_buffers()
     vim.keymap.set('n', '<C-Down>', ':resize -2<CR>', { desc = 'Decrease height of current window' })
     vim.keymap.set('n', '<C-Right>', ':vertical resize +2<CR>', { desc = 'Increase width of current window' })
     vim.keymap.set('n', '<C-Left>', ':vertical resize -2<CR>', { desc = 'Decrease width of current window' })
-
-    -- TODO: toggle `<C-w>m`
-    vim.keymap.set('n', '<C-w>m', '<C-w>|<C-w>_', { desc = 'Max Out' })
-    vim.keymap.set('n', '<C-w>e', '<C-w>=', { desc = 'Equally high and width' })
 end
 
 -------------------------------------------------------------
@@ -577,7 +583,8 @@ end
 
 -------------------------------------------------------------
 
-local function set_theme()
+local function set_theme(is_dark)
+    is_dark_theme = is_dark
     if is_dark_theme then
         vim.cmd.colorscheme(dark_theme)
     else
@@ -586,18 +593,17 @@ local function set_theme()
 end
 
 local function setup_theme()
-    set_theme()
+    set_theme(is_dark_theme)
 
     vim.api.nvim_set_keymap('n', '<C-0>', ':lua vim.g.neovide_scale_factor = 1<CR>', { silent = true, noremap = true })
+
     vim.api.nvim_set_keymap('n', '<C-=>', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.05<CR>',
         { silent = true })
+
     vim.api.nvim_set_keymap('n', '<C-->', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.05<CR>',
         { silent = true })
 
-    vim.keymap.set('n', '<leader>,t', function()
-        is_dark_theme = not is_dark_theme
-        set_theme()
-    end, { desc = 'Toggle theme' })
+    vim.keymap.set('n', '<leader>,t', function() set_theme(not is_dark_theme) end, { desc = 'Toggle theme' })
 
     vim.keymap.set('n', '<leader>,T', ':colorscheme ', { desc = 'Change theme' })
 end
@@ -877,6 +883,7 @@ end
 
 setup_dependencies()
 setup_base()
+setup_toggles()
 setup_yank()
 setup_editing()
 setup_scrolling()

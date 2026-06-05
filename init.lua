@@ -267,6 +267,7 @@ vim.opt.isfname:append '@-@'
 -------------------------------------------------------------
 
 vim.pack.add {
+    'https://github.com/mg979/vim-visual-multi',
     'https://github.com/folke/lazydev.nvim',
     'https://github.com/rafamadriz/friendly-snippets',
     'https://github.com/nvim-mini/mini.nvim',
@@ -958,6 +959,12 @@ local function setup_mini_statusline()
 end
 
 -------------------------------------------------------------
+--- OTHER SETUPS
+-------------------------------------------------------------
+
+local function setup_multi_cursor() require('visual_multi').setup() end
+
+-------------------------------------------------------------
 -- INTEGRATE SETUPS
 -------------------------------------------------------------
 
@@ -993,3 +1000,6 @@ setup_mini_surround()
 setup_mini_diff()
 setup_mini_tabline()
 setup_mini_statusline()
+
+setup_multi_cursor()
+

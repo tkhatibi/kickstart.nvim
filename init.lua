@@ -1,6 +1,4 @@
 -- NOTE `:reset` and `ZR` reset neovim
--- NOTE `:PackAdd https://github.com/bluz71/vim-moonfly-colors`
--- NOTE `:PackDel https://github.com/bluz71/vim-moonfly-colors`
 -- NOTE `viw`
 --   - following `an`s selects outer scope
 --   - following `in`s selects inner scope
@@ -133,12 +131,136 @@ local servers = {
 }
 
 -------------------------------------------------------------
+-- OPTIONS
+-------------------------------------------------------------
+-- NOTE `:help vim.o`
+-- NOTE `:help option-list`
+-- NOTE `:help vim.keymap.set()`
+
+-- [[ KEYS ]]
+vim.g.mapleader = ' '                -- NOTE `:help mapleader`
+vim.g.maplocalleader = ' '
+vim.o.backspace = "indent,eol,start" -- better backspace behaviour
+vim.o.updatetime = 1000              -- Decrease update time
+vim.o.timeoutlen = 1000              -- Decrease mapped sequence wait time
+vim.o.ttimeoutlen = 50             -- key code timeout
+
+-- [[ CURSOR, MOUSE, SOUNDS ]]
+-- NOTE `h 'guicursor'`
+vim.o.guicursor =
+'n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175'
+vim.o.mouse = "a"        -- enable mouse support
+vim.o.errorbells = false -- no error sounds
+vim.g.neovide_cursor_vfx_mode = 'wireframe'
+
+-- [[ FONT ]]
+vim.o.termguicolors = true
+vim.o.guifont = 'FiraCode Nerd Font Mono:h12'
+vim.g.have_nerd_font = true
+vim.g.neovide_scale_factor = 1
+
+-- [[ FILE ]]
+-- ask to save the current file before performing an operation needing saved changes (like `:q`)
+-- NOTE `:help 'confirm'`
+vim.o.confirm = true
+vim.o.autochdir = false                         -- do not autochange directories
+vim.o.backup = false                            -- do not create a backup file
+vim.o.writebackup = false                       -- do not write to a backup file
+vim.o.swapfile = false                          -- do not create a swapfile
+vim.o.undofile = true                           -- do create an undo file
+vim.o.undodir = vim.fn.expand("~/.vim/undodir") -- set the undo directory
+vim.o.autoread = true                           -- auto-reload changes if outside of neovim
+vim.o.autowrite = false                         -- do not auto-save
+vim.o.modifiable = true                         -- allow buffer modifications
+vim.o.hidden = true                             -- allow hidden buffers
+vim.o.encoding = 'UTF-8'
+
+-- [[ SCOPES ]]
+vim.o.foldmethod = "expr"                          -- use expression for folding
+vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()" -- use treesitter for folding
+vim.o.foldlevel = 99                               -- start with all folds open
+vim.o.showmatch = true                             -- highlights matching brackets
+vim.o.selection = "inclusive"                      -- include last char in selection
+vim.opt.iskeyword:append("-")                      -- include - in words
+vim.opt.clipboard:append("unnamedplus")            -- use system clipboard NOTE: `:help 'clipboard'`
+
+-- [[ LINES ]]
+vim.o.number = true               -- line number
+vim.o.relativenumber = true       -- relative line numbers
+vim.o.cursorline = true           -- highlight current line
+vim.o.concealcursor = ""          -- do not hide cursorline in markup
+vim.o.wrap = false                -- do not wrap lines by default
+vim.o.scrolloff = 5               -- Minimal number of screen lines to keep above and below the cursor.
+vim.o.sidescrolloff = 5           -- keep 5 lines to left/right of cursor
+vim.opt.fillchars = { eob = " " } -- hide "~" on empty lines
+
+-- [[ COLUMNS ]]
+vim.o.signcolumn = "yes"  -- always show a sign column
+vim.o.colorcolumn = "0"   -- don't show a coloumn as line limit
+vim.o.colorcolumn = "100" -- show a column at 100 position chars as line limit
+
+-- [[ INDENTS ]]
+vim.o.tabstop = 4        -- tabwidth
+vim.o.shiftwidth = 4     -- indent width
+vim.o.softtabstop = 4    -- soft tab stop not tabs on tab/backspace
+vim.o.expandtab = true   -- use spaces instead of tabs
+vim.o.smartindent = true -- smart auto-indent
+vim.o.autoindent = true  -- copy indent from current line
+vim.o.breakindent = true -- break indent
+
+-- [[ SEARCH ]]
+vim.o.ignorecase = true    -- case-insensitive search
+vim.o.smartcase = true     -- enable case-sensitive search when uppercased letter is present
+vim.o.inccommand = 'split' -- preview substitutions live, as you type!
+vim.o.hlsearch = true      -- highlight search matches
+vim.o.incsearch = true     -- shows matches as you type
+vim.opt.path:append("**")  -- include subdirs in search
+
+-- [[ STATUSLINE ]]
+vim.o.cmdheight = 1    -- single line command line
+vim.o.showmode = false -- do not show the mode, it's already in the status line
+vim.o.laststatus = 3
+
+-- [[ WINDOWS ]]
+vim.o.winborder = 'rounded'
+vim.o.pumheight = 10    -- popup menu height
+vim.o.pumblend = 10     -- popup menu transparency
+vim.o.winblend = 0      -- floating window transparency
+vim.o.splitbelow = true -- horizontal splits go below
+vim.o.splitright = true -- vertical splits go right
+--vim.g.netrw_banner = 0 -- show only files and folders in file explorer
+
+-- [[ LIST, COMPLETION ]]
+-- Sets how neovim will display certain whitespace characters in the editor.
+--  NOTE `:help 'list'`
+--  NOTE `:help 'listchars'`
+--
+--  Notice listchars is set using `vim.opt` instead of `vim.o`.
+--  It is very similar to `vim.o` but offers an interface for conveniently interacting with tables.
+--   NOTE `:help lua-options`
+--   NOTE `:help lua-guide-options`
+vim.o.list = true
+vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.o.completeopt = 'menuone,noselect,fuzzy,nosort,noinsert'
+vim.o.wildmenu = true -- tab completion
+vim.opt.shortmess:append 'c'
+
+-- [[ RESOURCES ]]
+vim.o.redrawtime = 10000    -- increase neovim redraw tolerance
+vim.o.maxmempattern = 20000 -- increase max memory
+vim.o.synmaxcol = 300       -- syntax highlighting limit
+
+-- [[ OTHERS ]]
+vim.o.conceallevel = 2                 -- obsidian requirement
+vim.opt.diffopt:append("linematch:60") -- improve diff display
+vim.opt.isfname:append("@-@")
+
+-------------------------------------------------------------
 -- DEPENDENCIES
 -------------------------------------------------------------
 
 vim.pack.add {
     'https://github.com/rafamadriz/friendly-snippets',
-    'https://github.com/bluz71/vim-moonfly-colors',
     'https://github.com/nvim-mini/mini.nvim',
     { src = 'https://github.com/nvim-treesitter/nvim-treesitter', branch = 'main' },
     'https://github.com/neovim/nvim-lspconfig',
@@ -151,6 +273,8 @@ require('vim._core.ui2').enable {}
 
 local MiniCompletion = require 'mini.completion'
 
+-- NOTE `:PackAdd https://github.com/bluz71/vim-moonfly-colors`
+-- NOTE `:PackDel vim-moonfly-colors`
 local function setup_dependencies()
     vim.api.nvim_create_user_command("PackAdd", function(opts)
         vim.pack.add(opts.fargs)
@@ -179,18 +303,12 @@ end
 -------------------------------------------------------------
 
 local function setup_base()
-    --  NOTE `:help vim.o`
-    --  NOTE `:help option-list`
-    --  NOTE `:help vim.keymap.set()`
+    if vim.fn.isdirectory(vim.o.undodir) == 0 then
+        vim.fn.mkdir(vim.o.undodir, "p")
+    end
 
     -- Enable faster startup by caching compiled Lua modules
     vim.loader.enable()
-
-    -- NOTE `:help mapleader`
-    vim.g.mapleader = ' '
-    vim.g.maplocalleader = ' '
-    vim.o.updatetime = 1000 -- Decrease update time
-    vim.o.timeoutlen = 1000 -- Decrease mapped sequence wait time
 
     vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
     vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
@@ -198,17 +316,6 @@ local function setup_base()
     vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
     -- TODO: move below lines to better setup function
-
-    --vim.g.netrw_banner = 0 -- show only files and folders in file explorer
-
-    vim.o.swapfile = false
-    vim.o.backup = false
-
-    vim.opt.isfname:append("@-@")
-
-    vim.o.signcolumn = 'yes'
-
-    vim.o.colorcolumn = "0"
 
     vim.keymap.set('n', '<leader>oh', ':checkhealth<CR>', { noremap = true, desc = 'Health Check' })
     vim.keymap.set('n', '<leader>ou', function()
@@ -229,10 +336,6 @@ end
 -------------------------------------------------------------
 
 local function setup_search()
-    vim.o.ignorecase = true    -- case-insensitive search
-    vim.o.smartcase = true     -- enable case-sensitive search when uppercased letter is present
-    vim.o.inccommand = 'split' -- preview substitutions live, as you type!
-
     -- clear highlights on search when pressing <esc> in normal mode
     --  NOTE `:help hlsearch`
     vim.keymap.set('n', '<esc>', '<cmd>nohlsearch<cr>')
@@ -336,12 +439,6 @@ end
 -------------------------------------------------------------
 
 local function setup_yank()
-    -- Sync clipboard between OS and Neovim.
-    --  Schedule the setting after `UiEnter` because it can increase startup-time.
-    --  Remove this option if you want your OS clipboard to remain independent.
-    --  NOTE `:help 'clipboard'`
-    vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
-
     -- Highlight when yanking (copying) text
     --  Try it with `yap` in normal mode
     --  NOTE `:help vim.hl.on_yank()`
@@ -395,24 +492,6 @@ end
 -------------------------------------------------------------
 
 local function setup_editing()
-    vim.opt.autoread = true
-    vim.opt.autowrite = false
-    vim.opt.encoding = 'UTF-8'
-    vim.opt.breakindent = true
-    vim.opt.tabstop = 4
-    vim.opt.softtabstop = 4
-    vim.opt.shiftwidth = 4
-    vim.opt.expandtab = true
-    vim.opt.wrap = true
-    vim.opt.smartindent = true
-
-    -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
-    -- instead raise a dialog asking if you wish to save the current file(s)
-    -- NOTE `:help 'confirm'`
-    vim.o.confirm = true
-
-    vim.o.undofile = true -- Enable undo/redo changes even after closing and reopening a file
-
     vim.api.nvim_set_keymap('n', '<c-a>', 'ggVG', { noremap = true, silent = true, desc = 'Select All Lines' })
 
     vim.keymap.set('i', '<C-d>', '<Del>', { noremap = true, desc = 'Delete next char' })
@@ -439,12 +518,8 @@ end
 
 -------------------------------------------------------------
 
+-- NOTE `:help wincmd` for a list of all window commands
 local function setup_buffers()
-    -- NOTE `:help wincmd` for a list of all window commands
-
-    vim.o.splitright = true
-    vim.o.splitbelow = true
-
     vim.keymap.set('n', '<leader><leader>', '<C-6>', { desc = 'Switch buffer' })
 
     vim.keymap.set('n', '<C-w>t', ':tabe %<CR>', { desc = 'Copy into a new tab' })
@@ -493,9 +568,6 @@ end
 -------------------------------------------------------------
 
 local function setup_scrolling()
-    vim.o.scrolloff = 5 -- Minimal number of screen lines to keep above and below the cursor.
-    -- vim.opt.sidescrolloff = 999
-
     vim.keymap.set('n', '<C-u>', '<C-u>zz', { desc = 'Scroll up in buffer with cursor centered' })
     vim.keymap.set('n', '<C-d>', '<C-d>zz', { desc = 'Scroll down in buffer with cursor centered' })
 
@@ -514,37 +586,6 @@ local function set_theme()
 end
 
 local function setup_theme()
-    -- [[ CURSOR ]]
-    vim.o.mouse = 'a'
-    -- NOTE `h 'guicursor'`
-    vim.o.guicursor = 'n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175'
-    vim.o.cursorline = true -- Show which line your cursor is on
-
-    vim.o.showmode = false  -- it's already in the status line
-    vim.o.laststatus = 3
-    -- vim.o.termguicolors = true
-
-    vim.o.number = true
-    vim.o.relativenumber = true
-
-    vim.o.winborder = 'rounded'
-
-    vim.g.have_nerd_font = true
-    vim.o.guifont = 'FiraCode Nerd Font Mono:h12'
-    vim.g.neovide_scale_factor = 1
-    vim.g.neovide_cursor_vfx_mode = 'wireframe'
-
-    -- Sets how neovim will display certain whitespace characters in the editor.
-    --  NOTE `:help 'list'`
-    --  NOTE `:help 'listchars'`
-    --
-    --  Notice listchars is set using `vim.opt` instead of `vim.o`.
-    --  It is very similar to `vim.o` but offers an interface for conveniently interacting with tables.
-    --   NOTE `:help lua-options`
-    --   NOTE `:help lua-guide-options`
-    vim.o.list = true
-    vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-
     set_theme()
 
     vim.api.nvim_set_keymap('n', '<C-0>', ':lua vim.g.neovide_scale_factor = 1<CR>', { silent = true, noremap = true })
@@ -757,9 +798,6 @@ local function setup_mini_cmdline()
 end
 
 local function setup_mini_completion()
-    vim.opt.completeopt = 'menuone,noselect,fuzzy,nosort'
-    vim.opt.shortmess:append 'c'
-
     MiniCompletion.setup {
         lsp_completion = {
             auto_setup = true,
@@ -832,8 +870,6 @@ local function setup_mini_statusline()
         return '%2l:%-2v/%2L'
     end
 end
-
--------------------------------------------------------------
 
 -------------------------------------------------------------
 -- INTEGRATE SETUPS

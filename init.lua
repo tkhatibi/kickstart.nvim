@@ -31,25 +31,25 @@ local ensure_syntax_supported = { 'all' }
 --    https://github.com/pmizio/typescript-tools.nvim
 --
 local servers = {
-  clangd = {},
-  neocmakelsp = {}, -- faster than cmake (rust)
-  jinja_lsp = {},
-  css_variables = {}, -- unofficial (typescript)
   -- docker_compose_language_service = {},
   -- gitlab_ci_ls = {}, -- unofficial (rust)
   -- gh_actions_ls = {}, -- unofficial (javascript)
   -- ols = {}, -- odin ls
-  buf_ls = {}, -- proto buffer (go)
-  tailwindcss = {}, -- official
-  html = {}, -- vscode extracted (js)
-  eslint = {}, -- vscode extracted (js)
-  cssls = {}, -- vscode extracted (js)
-  jsonls = {}, -- vscode extracted (js)
-  markdown_oxide = {}, -- markdown ls (rust)
-  taplo = {}, -- toml formatter (rust)
   -- vacuum = {}, -- openapi 2 and 3 (go)
   -- gopls = {}, -- golang
   -- pyright = {},
+  clangd = {},
+  neocmakelsp = {},    -- faster than cmake (rust)
+  jinja_lsp = {},
+  css_variables = {},  -- unofficial (typescript)
+  buf_ls = {},         -- proto buffer (go)
+  tailwindcss = {},    -- official
+  html = {},           -- vscode extracted (js)
+  eslint = {},         -- vscode extracted (js)
+  cssls = {},          -- vscode extracted (js)
+  jsonls = {},         -- vscode extracted (js)
+  markdown_oxide = {}, -- markdown ls (rust)
+  taplo = {},          -- toml formatter (rust)
   rust_analyzer = {
     settings = {
       ['rust-analyzer'] = {
@@ -76,18 +76,55 @@ local servers = {
     -- filetypes = { ... },
     -- capabilities = {},
     settings = {
+      -- NOTE: to override these global settings, you can define a `.luarc.json` in project root:
+      -- {
+      --   "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/schema/schema.json",
+      --   "workspace": {
+      --     "checkThirdParty": false,
+      --     "library": [
+      --       ".luastubs",
+      --       "${3rd}/love2d/library",
+      --       "${3rd}/busted/library",
+      --       "${3rd}/luaassert/library"
+      --     ]
+      --   },
+      --   "diagnostics": {
+      --     "globals": ["vim"]
+      --   },
+      --   "format": {
+      --     "enable": true,
+      --     "defaultConfig": {
+      --       "trailing_table_separator": "smart"
+      --     }
+      --   },
+      --   "hint": {
+      --     "enable": true,
+      --     "setType": true
+      --   }
+      -- }
       Lua = {
         workspace = {
           library = { vim.fn.expand '.luastubs' },
-          -- library = {
-          --     vim.fn.expand '.luastubs',
-          --     unpack(vim.api.nvim_get_runtime_file("", true))
-          -- },
           checkThirdParty = false,
         },
         type = {
           weakNilCheck = false,
           weakUnionCheck = false,
+        },
+        format = {
+          enable = true,
+          defaultConfig = { -- EmmyLua
+            indent_style = 'space',
+            indent_size = '2',
+            quote_style = 'single',
+          },
+        },
+        completion = {
+          callSnippet = 'Replace',
+        },
+        hint = {
+          enable = true,
+          setType = true,
         },
         diagnostics = {
           -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
@@ -129,9 +166,6 @@ local servers = {
             'match',
           },
         },
-        completion = {
-          callSnippet = 'Replace',
-        },
       },
     },
   },
@@ -145,18 +179,18 @@ local servers = {
 -- NOTE `:help vim.keymap.set()`
 
 -- [[ KEYS ]]
-vim.g.mapleader = ' ' -- NOTE `:help mapleader`
+vim.g.mapleader = ' '                -- NOTE `:help mapleader`
 vim.g.maplocalleader = ' '
 vim.o.backspace = 'indent,eol,start' -- better backspace behaviour
-vim.o.updatetime = 1000 -- Decrease update time
-vim.o.timeoutlen = 1000 -- Decrease mapped sequence wait time
-vim.o.ttimeoutlen = 50 -- key code timeout
+vim.o.updatetime = 1000              -- Decrease update time
+vim.o.timeoutlen = 1000              -- Decrease mapped sequence wait time
+vim.o.ttimeoutlen = 50               -- key code timeout
 
 -- [[ CURSOR, MOUSE, SOUNDS ]]
 -- NOTE `h 'guicursor'`
 vim.o.guicursor =
-  'n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175'
-vim.o.mouse = 'a' -- enable mouse support
+'n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175'
+vim.o.mouse = 'a'        -- enable mouse support
 vim.o.errorbells = false -- no error sounds
 vim.g.neovide_cursor_vfx_mode = 'wireframe'
 
@@ -170,69 +204,69 @@ vim.g.neovide_scale_factor = 1
 -- ask to save the current file before performing an operation needing saved changes (like `:q`)
 -- NOTE `:help 'confirm'`
 vim.o.confirm = true
-vim.o.autochdir = false -- do not autochange directories
-vim.o.backup = false -- do not create a backup file
-vim.o.writebackup = false -- do not write to a backup file
-vim.o.swapfile = false -- do not create a swapfile
-vim.o.undofile = true -- do create an undo file
+vim.o.autochdir = false                        -- do not autochange directories
+vim.o.backup = false                           -- do not create a backup file
+vim.o.writebackup = false                      -- do not write to a backup file
+vim.o.swapfile = false                         -- do not create a swapfile
+vim.o.undofile = true                          -- do create an undo file
 vim.o.undodir = vim.fn.expand '~/.vim/undodir' -- set the undo directory
-vim.o.autoread = true -- auto-reload changes if outside of neovim
-vim.o.autowrite = false -- do not auto-save
-vim.o.modifiable = true -- allow buffer modifications
-vim.o.hidden = true -- allow hidden buffers
+vim.o.autoread = true                          -- auto-reload changes if outside of neovim
+vim.o.autowrite = false                        -- do not auto-save
+vim.o.modifiable = true                        -- allow buffer modifications
+vim.o.hidden = true                            -- allow hidden buffers
 vim.o.encoding = 'UTF-8'
 
 -- [[ SCOPES ]]
-vim.o.foldmethod = 'expr' -- use expression for folding
+vim.o.foldmethod = 'expr'                          -- use expression for folding
 vim.o.foldexpr = 'v:lua.vim.treesitter.foldexpr()' -- use treesitter for folding
-vim.o.foldlevel = 99 -- start with all folds open
-vim.o.showmatch = true -- highlights matching brackets
-vim.o.selection = 'inclusive' -- include last char in selection
-vim.opt.iskeyword:append '-' -- include - in words
-vim.opt.clipboard:append 'unnamedplus' -- use system clipboard NOTE: `:help 'clipboard'`
+vim.o.foldlevel = 99                               -- start with all folds open
+vim.o.showmatch = true                             -- highlights matching brackets
+vim.o.selection = 'inclusive'                      -- include last char in selection
+vim.opt.iskeyword:append '-'                       -- include - in words
+vim.opt.clipboard:append 'unnamedplus'             -- use system clipboard NOTE: `:help 'clipboard'`
 
 -- [[ LINES ]]
-vim.o.number = true -- line number
-vim.o.relativenumber = true -- relative line numbers
-vim.o.cursorline = true -- highlight current line
-vim.o.concealcursor = '' -- do not hide cursorline in markup
-vim.o.wrap = false -- do not wrap lines by default
-vim.o.scrolloff = 5 -- Minimal number of screen lines to keep above and below the cursor.
-vim.o.sidescrolloff = 5 -- keep 5 lines to left/right of cursor
+vim.o.number = true               -- line number
+vim.o.relativenumber = true       -- relative line numbers
+vim.o.cursorline = true           -- highlight current line
+vim.o.concealcursor = ''          -- do not hide cursorline in markup
+vim.o.wrap = false                -- do not wrap lines by default
+vim.o.scrolloff = 5               -- Minimal number of screen lines to keep above and below the cursor.
+vim.o.sidescrolloff = 5           -- keep 5 lines to left/right of cursor
 vim.opt.fillchars = { eob = ' ' } -- hide "~" on empty lines
 
 -- [[ COLUMNS ]]
-vim.o.signcolumn = 'yes' -- always show a sign column
-vim.o.colorcolumn = '0' -- don't show a coloumn as line limit
+vim.o.signcolumn = 'yes'  -- always show a sign column
+vim.o.colorcolumn = '0'   -- don't show a coloumn as line limit
 vim.o.colorcolumn = '100' -- show a column at 100 position chars as line limit
 
 -- [[ INDENTS ]]
-vim.o.tabstop = 4 -- tabwidth
-vim.o.shiftwidth = 4 -- indent width
-vim.o.softtabstop = 4 -- soft tab stop not tabs on tab/backspace
-vim.o.expandtab = true -- use spaces instead of tabs
+vim.o.tabstop = 2        -- tabwidth
+vim.o.shiftwidth = 2     -- indent width
+vim.o.softtabstop = 2    -- soft tab stop not tabs on tab/backspace
+vim.o.expandtab = true   -- use spaces instead of tabs
 vim.o.smartindent = true -- smart auto-indent
-vim.o.autoindent = true -- copy indent from current line
+vim.o.autoindent = true  -- copy indent from current line
 vim.o.breakindent = true -- break indent
 
 -- [[ SEARCH ]]
-vim.o.ignorecase = true -- case-insensitive search
-vim.o.smartcase = true -- enable case-sensitive search when uppercased letter is present
+vim.o.ignorecase = true    -- case-insensitive search
+vim.o.smartcase = true     -- enable case-sensitive search when uppercased letter is present
 vim.o.inccommand = 'split' -- preview substitutions live, as you type!
-vim.o.hlsearch = true -- highlight search matches
-vim.o.incsearch = true -- shows matches as you type
-vim.opt.path:append '**' -- include subdirs in search
+vim.o.hlsearch = true      -- highlight search matches
+vim.o.incsearch = true     -- shows matches as you type
+vim.opt.path:append '**'   -- include subdirs in search
 
 -- [[ STATUSLINE ]]
-vim.o.cmdheight = 1 -- single line command line
+vim.o.cmdheight = 1    -- single line command line
 vim.o.showmode = false -- do not show the mode, it's already in the status line
 vim.o.laststatus = 3
 
 -- [[ WINDOWS ]]
 vim.o.winborder = 'rounded'
-vim.o.pumheight = 10 -- popup menu height
-vim.o.pumblend = 10 -- popup menu transparency
-vim.o.winblend = 0 -- floating window transparency
+vim.o.pumheight = 10    -- popup menu height
+vim.o.pumblend = 10     -- popup menu transparency
+vim.o.winblend = 0      -- floating window transparency
 vim.o.splitbelow = true -- horizontal splits go below
 vim.o.splitright = true -- vertical splits go right
 --vim.g.netrw_banner = 0 -- show only files and folders in file explorer
@@ -253,74 +287,27 @@ vim.o.wildmenu = true -- tab completion
 vim.opt.shortmess:append 'c'
 
 -- [[ RESOURCES ]]
-vim.o.redrawtime = 10000 -- increase neovim redraw tolerance
+vim.o.redrawtime = 10000    -- increase neovim redraw tolerance
 vim.o.maxmempattern = 20000 -- increase max memory
-vim.o.synmaxcol = 300 -- syntax highlighting limit
+vim.o.synmaxcol = 300       -- syntax highlighting limit
 
 -- [[ OTHERS ]]
-vim.o.conceallevel = 2 -- obsidian requirement
+vim.o.conceallevel = 2                -- obsidian requirement
 vim.opt.diffopt:append 'linematch:60' -- improve diff display
 vim.opt.isfname:append '@-@'
 
 -------------------------------------------------------------
--- DEPENDENCIES
+-- HELPERS
 -------------------------------------------------------------
 
-vim.pack.add {
-  'https://github.com/mg979/vim-visual-multi',
-  'https://github.com/folke/lazydev.nvim',
-  'https://github.com/rafamadriz/friendly-snippets',
-  'https://github.com/nvim-mini/mini.nvim',
-  { src = 'https://github.com/nvim-treesitter/nvim-treesitter', branch = 'main' },
-  'https://github.com/neovim/nvim-lspconfig',
-  'https://github.com/mason-org/mason.nvim',
-  'https://github.com/tpope/vim-fugitive',
-}
+local augroup = vim.api.nvim_create_augroup('UserConfig', { clear = true })
 
--- NOTE `g<` jumps to commandline output
-require('vim._core.ui2').enable {}
-
-local MiniCompletion = require 'mini.completion'
-
--- NOTE `:PackAdd https://github.com/bluz71/vim-moonfly-colors`
--- NOTE `:PackDel vim-moonfly-colors`
-local function setup_dependencies()
-  vim.api.nvim_create_user_command(
-    'PackAdd',
-    function(opts) vim.pack.add(opts.fargs) end,
-    { nargs = '+', desc = 'Add plugins (:PackAdd user/repo1 user2/repo2)' }
-  )
-
-  vim.api.nvim_create_user_command(
-    'PackDel',
-    function(opts) vim.pack.del(opts.fargs) end,
-    { nargs = '+', desc = 'Del plugins (:PackDel user/repo1 user2/repo2)' }
-  )
-
-  vim.api.nvim_create_user_command('PackUpdate', function(opts)
-    -- check if any arg is passed
-    if opts.args:match '%S' then
-      -- update specific plugins
-      local plugins = vim.split(opts.args, '%s+', { trimempty = true })
-      -- update only specific plugins
-      vim.pack.update(plugins)
-    else
-      -- updat all
-      vim.pack.update()
-    end
-  end, { nargs = '*', desc = 'Update plugins (:PackUpdate user/repo1 user2/repo2)' })
-end
-
--------------------------------------------------------------
--- HELPER FUNCTIONS
--------------------------------------------------------------
-
-local i = 'i'
 local n = 'n'
+local i = 'i'
 local t = 't'
 local v = 'v'
 local x = 'x'
-local noremap = 'noremap'
+local remap = 'remap'
 local nowait = 'nowait'
 local silent = 'silent'
 local script = 'script'
@@ -329,24 +316,27 @@ local expr = 'expr'
 
 local function map(lhs, rhs, desc, ...)
   local modes = {}
-  local opts = { desc = desc }
+  local opts = {
+    desc = desc,
+    noremap = true,
+  }
   for _, value in ipairs { ... } do
     if value == silent then
       opts.silent = true
+    elseif value == remap then
+      opts.noremap = false
     elseif value == expr then
       opts.expr = true
-    elseif value == noremap then
-      opts.noremap = true
     elseif value == script then
       opts.script = true
     elseif value == unique then
       opts.unique = true
     elseif value == nowait then
       opts.nowait = true
-    elseif value == i then
-      modes[#modes + 1] = i
     elseif value == n then
       modes[#modes + 1] = n
+    elseif value == i then
+      modes[#modes + 1] = i
     elseif value == t then
       modes[#modes + 1] = t
     elseif value == v then
@@ -359,34 +349,30 @@ local function map(lhs, rhs, desc, ...)
       end
     end
   end
-  modes = #modes > 0 and modes or { n }
   vim.keymap.set(modes, lhs, rhs, opts)
 end
 
-local function imap(l, r, d, ...) map(l, r, d, i, ...) end
 local function nmap(l, r, d, ...) map(l, r, d, n, ...) end
+local function imap(l, r, d, ...) map(l, r, d, i, ...) end
 local function tmap(l, r, d, ...) map(l, r, d, t, ...) end
 local function vmap(l, r, d, ...) map(l, r, d, v, ...) end
 local function xmap(l, r, d, ...) map(l, r, d, x, ...) end
 
-local function inoremap(l, r, d, ...) map(l, r, d, i, noremap, ...) end
-local function nnoremap(l, r, d, ...) map(l, r, d, n, noremap, ...) end
-local function tnoremap(l, r, d, ...) map(l, r, d, t, noremap, ...) end
-local function vnoremap(l, r, d, ...) map(l, r, d, v, noremap, ...) end
-local function xnoremap(l, r, d, ...) map(l, r, d, x, noremap, ...) end
+-------------------------------------------------------------
+-- BASIC
+-------------------------------------------------------------
 
--------------------------------------------------------------
--- PRIMITIVES
--------------------------------------------------------------
+-- NOTE `g<` jumps to commandline output
+require('vim._core.ui2').enable {}
+
+-- Enable faster startup by caching compiled Lua modules
+vim.loader.enable()
 
 local function setup_base()
   if vim.fn.isdirectory(vim.o.undodir) == 0 then vim.fn.mkdir(vim.o.undodir, 'p') end
 
-  -- Enable faster startup by caching compiled Lua modules
-  vim.loader.enable()
-
-  nmap('j', function() return vim.v.count == 0 and 'gj' or 'j' end, 'Down (wrap-aware)', silent, expr)
-  nmap('k', function() return vim.v.count == 0 and 'gk' or 'k' end, 'Up (wrap-aware)', silent, expr)
+  nmap('j', "v:count == 0 ? 'gj' : 'j'", 'Down (wrap-aware)', expr)
+  nmap('k', "v:count == 0 ? 'gk' : 'k'", 'Up (wrap-aware)', expr)
 
   nmap('<left>', '<cmd>echo "Use h to move!!"<CR>')
   nmap('<right>', '<cmd>echo "Use l to move!!"<CR>')
@@ -395,16 +381,16 @@ local function setup_base()
 
   -- TODO: move below lines to better setup function
 
-  nnoremap('<leader>oh', ':checkhealth<CR>', 'Health Check')
+  nmap('<leader>oh', ':checkhealth<CR>', 'Health Check')
 
-  nnoremap('<leader>ou', function()
+  nmap('<leader>ou', function()
     vim.cmd.packadd 'nvim.undotree'
     require('undotree').open()
   end, 'Undotree')
 
-  nmap('<leader>rx', '<cmd>!chmod +x %<CR>', 'Make file executable', silent)
+  nmap('<leader>rx', '<cmd>!chmod +x %<CR>', 'Make file executable')
 
-  nnoremap('<leader>xx', ':@<CR>', 'Executes last command')
+  nmap('<leader>xx', ':@<CR>', 'Executes last command')
 
   -------------------------------------------------------------
   -- BASIC AUTOCOMMANDS
@@ -415,6 +401,17 @@ end
 -------------------------------------------------------------
 
 local function setup_toggles()
+  -- wrap, linebreak and spellcheck on markdown and text files
+  vim.api.nvim_create_autocmd('FileType', {
+    group = augroup,
+    pattern = { 'markdown', 'text', 'gitcommit' },
+    callback = function()
+      vim.opt_local.wrap = true
+      vim.opt_local.linebreak = true
+      vim.opt_local.spell = true
+    end,
+  })
+
   nmap('<leader>,d', ':lua vim.diagnostic.enable(not vim.diagnostic.is_enabled())<CR>', 'Toggle diagnostics')
 
   nmap('<leader>,w', ':set wrap!<CR>', 'Toggle line wrap')
@@ -489,7 +486,7 @@ local function setup_quickfix()
     underline = { severity = { min = vim.diagnostic.severity.warn } },
 
     -- Can switch between these as you prefer
-    virtual_text = false, -- Text shows up at the end of the line
+    virtual_text = false,  -- Text shows up at the end of the line
     virtual_lines = false, -- Text shows up underneath the line, with virtual lines
 
     -- Auto open the float, so you can easily read the errors when jumping with `[d` and `]d`
@@ -508,13 +505,13 @@ end
 -------------------------------------------------------------
 
 local function setup_terminal()
-  nnoremap('<leader>to', ':terminal<CR>', 'Open terminal here', silent)
+  nmap('<leader>to', ':terminal<CR>i', 'Open terminal here')
 
-  nnoremap('<leader>tt', '<C-w>v<C-w>T:terminal<CR>', 'Open terminal in new tab', silent)
+  nmap('<leader>tt', '<C-w>v<C-w>T:terminal<CR>i', 'Open terminal in new tab')
 
-  nnoremap('<leader>tl', '<C-w>v:terminal<CR>', 'Open terminal right', silent)
+  nmap('<leader>tl', '<C-w>v:terminal<CR>i', 'Open terminal right')
 
-  nnoremap('<leader>tj', '<C-w>s:terminal<CR>', 'Open terminal below', silent)
+  nmap('<leader>tj', '<C-w>s:terminal<CR>i', 'Open terminal below')
 
   -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
   -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -523,7 +520,7 @@ local function setup_terminal()
   -- NOTE This won't work in all terminal emulators/tmux/etc. Try your own mapping
   -- or just use <C-\><C-n> to exit terminal mode
   tmap('<Esc><Esc>', '<C-\\><C-n>', 'Exit terminal mode')
-  tnoremap('<C-[>', [[<C-\><C-n>]], 'Exit terminal mode')
+  tmap('<C-[>', [[<C-\><C-n>]], 'Exit terminal mode')
 end
 
 -------------------------------------------------------------
@@ -534,7 +531,7 @@ local function setup_yank()
   --  NOTE `:help vim.hl.on_yank()`
   vim.api.nvim_create_autocmd('TextYankPost', {
     desc = 'Highlight when yanking (copying) text',
-    -- group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
+    group = augroup,
     callback = function() vim.hl.on_yank() end,
   })
 
@@ -573,7 +570,7 @@ local function setup_yank()
     print('Yanked absolute path: ' .. vim.fn.expand '%:p')
   end, 'Yank Absolute File Path')
 
-  nnoremap('<leader>yy', 'mzggVGy`z', 'Yank whole content', silent)
+  nmap('<leader>yy', 'mzggVGy`z', 'Yank whole content')
 
   -- FIXME
   nmap('<leader>yc', 'g<ggVGy:q<CR>', 'Yank cmdline message')
@@ -582,9 +579,13 @@ end
 -------------------------------------------------------------
 
 local function setup_editing()
-  nnoremap('<c-a>', 'ggVG', 'Select All Lines', silent)
+  nmap('<c-a>', 'ggVG', 'Select All Lines')
+  vmap('<c-a>', '<Esc>ggVG', 'Select All Lines')
 
-  inoremap('<C-d>', '<Del>', 'Delete next char')
+  imap('<C-d>', '<Del>', 'Delete next char')
+
+  nmap('J', 'mzJ`z', 'Join lines and keep cursor position')
+  nmap('<leader>J', 'J', 'Join lines and put cursor between')
 
   nmap('<A-o>', 'mzo<Esc>`z', 'Add blank line below staying here')
   nmap('<A-S-o>', 'mzO<Esc>`z', 'Add blank line above staying here')
@@ -605,18 +606,36 @@ end
 
 -- NOTE `:help wincmd` for a list of all window commands
 local function setup_buffers()
-  nmap('<leader>w', ':lua vim.lsp.buf.format()<CR>:w<CR>', 'Switch buffer')
+  vim.api.nvim_create_autocmd('BufReadPost', {
+    group = augroup,
+    desc = 'Restore last cursor position',
+    callback = function()
+      if vim.o.diff then -- except in diff mode
+        return
+      end
+
+      local last_pos = vim.api.nvim_buf_get_mark(0, '"') -- {line, col}
+      local last_line = vim.api.nvim_buf_line_count(0)
+
+      local row = last_pos[1]
+      if row < 1 or row > last_line then return end
+
+      pcall(vim.api.nvim_win_set_cursor, 0, last_pos)
+    end,
+  })
+
+  nmap('<leader>w', ':lua vim.lsp.buf.format()<CR>:w<CR>', 'Format and write buffer')
 
   nmap('<leader><leader>', '<C-6>', 'Switch buffer')
 
   nmap('<C-w>t', ':tabe %<CR>', 'Copy into a new tab')
 
   -- NOTE <C-A-l> and <C-A-h> are reserved for terminal tab moves
-  nnoremap('<A-l>', 'gt', 'Go to next tab')
-  nnoremap('<A-h>', 'gT', 'Go to prev tab')
+  nmap('<A-l>', 'gt', 'Go to next tab')
+  nmap('<A-h>', 'gT', 'Go to prev tab')
 
-  nnoremap('[w', '<C-w>W', 'Move focus to the previous window')
-  nnoremap(']w', '<C-w>w', 'Move focus to the next window')
+  nmap('[w', '<C-w>W', 'Move focus to the previous window')
+  nmap(']w', '<C-w>w', 'Move focus to the next window')
 
   nmap('<C-h>', '<C-w><C-h>', 'Move focus to the left window')
   nmap('<C-l>', '<C-w><C-l>', 'Move focus to the right window')
@@ -672,15 +691,61 @@ end
 local function setup_theme()
   set_theme(is_dark_theme)
 
-  nnoremap('<C-0>', ':lua vim.g.neovide_scale_factor = 1<CR>', 'Reset zoom', silent)
+  nmap('<C-0>', ':lua vim.g.neovide_scale_factor = 1<CR>', 'Reset zoom')
 
-  nmap('<C-=>', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.05<CR>', 'Zoom in', silent)
+  nmap('<C-=>', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.05<CR>', 'Zoom in')
 
-  nmap('<C-->', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.05<CR>', 'Zoom out', silent)
+  nmap('<C-->', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.05<CR>', 'Zoom out')
 
   nmap('<leader>,t', function() set_theme(not is_dark_theme) end, 'Toggle theme')
 
   nmap('<leader>,T', ':colorscheme ', 'Change theme')
+end
+
+-------------------------------------------------------------
+-- PLUGINS
+-------------------------------------------------------------
+
+vim.pack.add {
+  'https://github.com/mg979/vim-visual-multi',
+  'https://github.com/folke/lazydev.nvim',
+  'https://github.com/rafamadriz/friendly-snippets',
+  'https://github.com/nvim-mini/mini.nvim',
+  { src = 'https://github.com/nvim-treesitter/nvim-treesitter', branch = 'main', build = ':TSUpdate' },
+  'https://github.com/neovim/nvim-lspconfig',
+  'https://github.com/mason-org/mason.nvim',
+  'https://github.com/tpope/vim-fugitive',
+}
+
+local MiniCompletion = require 'mini.completion'
+
+-- NOTE `:PackAdd https://github.com/bluz71/vim-moonfly-colors`
+-- NOTE `:PackDel vim-moonfly-colors`
+local function create_pack_commands()
+  vim.api.nvim_create_user_command(
+    'PackAdd',
+    function(opts) vim.pack.add(opts.fargs) end,
+    { nargs = '+', desc = 'Add plugins (:PackAdd user/repo1 user2/repo2)' }
+  )
+
+  vim.api.nvim_create_user_command(
+    'PackDel',
+    function(opts) vim.pack.del(opts.fargs) end,
+    { nargs = '+', desc = 'Del plugins (:PackDel user/repo1 user2/repo2)' }
+  )
+
+  vim.api.nvim_create_user_command('PackUpdate', function(opts)
+    -- check if any arg is passed
+    if opts.args:match '%S' then
+      -- update specific plugins
+      local plugins = vim.split(opts.args, '%s+', { trimempty = true })
+      -- update only specific plugins
+      vim.pack.update(plugins)
+    else
+      -- updat all
+      vim.pack.update()
+    end
+  end, { nargs = '*', desc = 'Update plugins (:PackUpdate user/repo1 user2/repo2)' })
 end
 
 -------------------------------------------------------------
@@ -713,9 +778,9 @@ local function setup_mason()
   require('mason').setup()
 
   -- NOTE: press `i` on each LSP to be installed
-  nnoremap('<leader>mm', ':Mason<CR>', 'Open mason window')
-  nnoremap('<leader>mi', ':MasonInstall ', 'Mason install')
-  nnoremap('<leader>mp', ':lua print(vim.fn.exepath(""))<Left><Left><Left>', 'See installed lsp path')
+  nmap('<leader>mm', ':Mason<CR>', 'Open mason window')
+  nmap('<leader>mi', ':MasonInstall ', 'Mason install')
+  nmap('<leader>mp', ':lua print(vim.fn.exepath(""))<Left><Left><Left>', 'See installed lsp path')
 end
 
 -- NOTE `:h lsp`
@@ -737,12 +802,9 @@ local function setup_lsp()
   -- NOTE map('K', vim.lsp.buf.hover, "Show documentation", opts)
   -- NOTE map('<C-w>d', vim.diagnostic.open_float, 'Show line diagnostics', opts)
 
-  map('grd', vim.lsp.buf.definition, 'Go to definition', opts)
-  map('grf', vim.lsp.buf.format, 'Format local buffer', opts)
-
   vim.diagnostic.config {
     virtual_text = true, -- TODO: toggle to false in zen mode
-    underline = false, -- draws an underline below diagnosed words
+    underline = false,   -- draws an underline below diagnosed words
     update_in_insert = false,
   }
 
@@ -759,9 +821,12 @@ local function setup_lsp()
 
   local ensure_installed = vim.tbl_keys(servers or {})
   vim.list_extend(ensure_installed, {
-    'stylua', -- Used to format Lua code
+    -- 'stylua', -- Used to format Lua code
   })
   vim.lsp.enable(ensure_installed)
+
+  nmap('grd', vim.lsp.buf.definition, 'Go to definition', opts)
+  nmap('grf', vim.lsp.buf.format, 'Format local buffer', opts)
 end
 
 -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
@@ -862,7 +927,8 @@ local function setup_mini_pick()
 
   nmap('<leader>p', ':Pick ', 'Pick')
 
-  nmap('<leader>sw', function() MiniPick.builtin.grep { pattern = vim.fn.expand '<cword>' } end, 'Search word under cursor')
+  nmap('<leader>sw', function() MiniPick.builtin.grep { pattern = vim.fn.expand '<cword>' } end,
+    'Search word under cursor')
 
   nmap('<leader>ob', function() MiniPick.builtin.buffers() end, 'Open buffer')
 
@@ -966,7 +1032,6 @@ end
 -- INTEGRATE SETUPS
 -------------------------------------------------------------
 
-setup_dependencies()
 setup_base()
 setup_toggles()
 setup_yank()
@@ -978,6 +1043,8 @@ setup_terminal()
 setup_quickfix()
 setup_vim()
 setup_theme()
+
+create_pack_commands()
 
 setup_treesitter()
 setup_mason()

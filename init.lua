@@ -359,6 +359,54 @@ local function vmap(l, r, d, ...) map(l, r, d, v, ...) end
 local function xmap(l, r, d, ...) map(l, r, d, x, ...) end
 
 -------------------------------------------------------------
+-- COMMANDS
+-------------------------------------------------------------
+
+local function setup_custom_commands()
+  -- NOTE `:PackAdd https://github.com/bluz71/vim-moonfly-colors`
+  vim.api.nvim_create_user_command(
+    'PackAdd',
+    function(opts) vim.pack.add(opts.fargs) end,
+    { nargs = '+', desc = 'Add plugins (:PackAdd user/repo1 user2/repo2)' }
+  )
+
+  -- NOTE `:PackDel vim-moonfly-colors`
+  vim.api.nvim_create_user_command(
+    'PackDel',
+    function(opts) vim.pack.del(opts.fargs) end,
+    { nargs = '+', desc = 'Del plugins (:PackDel user/repo1 user2/repo2)' }
+  )
+
+  -- NOTE `:PackUpdate vim-moonfly-colors`
+  vim.api.nvim_create_user_command('PackUpdate', function(opts)
+    -- check if any arg is passed
+    if opts.args:match '%S' then
+      -- update specific plugins
+      local plugins = vim.split(opts.args, '%s+', { trimempty = true })
+      -- update only specific plugins
+      vim.pack.update(plugins)
+    else
+      -- updat all
+      vim.pack.update()
+    end
+  end, { nargs = '*', desc = 'Update plugins (:PackUpdate user/repo1 user2/repo2)' })
+
+  -- NOTE `:Format`
+  vim.api.nvim_create_user_command(
+    'Format',
+    function() vim.lsp.buf.format() end,
+    { desc = 'Format the current buffer synchronously' }
+  )
+
+  -- NOTE `:FormatAsync`
+  vim.api.nvim_create_user_command(
+    'FormatAsync',
+    function(opts) vim.lsp.buf.format({ async = true }) end,
+    { desc = 'Format the current buffer asynchronously' }
+  )
+end
+
+-------------------------------------------------------------
 -- BASIC
 -------------------------------------------------------------
 
@@ -624,7 +672,7 @@ local function setup_buffers()
     end,
   })
 
-  nmap('<leader>w', ':lua vim.lsp.buf.format()<CR>:w<CR>', 'Format and write buffer')
+  nmap('<leader>w', ':Format<CR>:w<CR>', 'Format and write buffer')
 
   nmap('<leader><leader>', '<C-6>', 'Switch buffer')
 
@@ -658,7 +706,7 @@ end
 local function setup_vim()
   nmap('<leader>vc', ':e ~/.config/nvim/init.lua<CR>', 'configure')
 
-  nmap('<leader>vv', ':lua vim.lsp.buf.format()<CR>:w<CR>:so %<CR>:nohlsearch<CR>', 'source')
+  nmap('<leader>vv', ':Format<CR>:w<CR>:so %<CR>:nohlsearch<CR>', 'source')
 
   nmap('<leader>vn', ':e ~/.config/nvim/NOTES.md<CR>', 'NOTES.md')
 
@@ -718,35 +766,6 @@ vim.pack.add {
 }
 
 local MiniCompletion = require 'mini.completion'
-
--- NOTE `:PackAdd https://github.com/bluz71/vim-moonfly-colors`
--- NOTE `:PackDel vim-moonfly-colors`
-local function create_pack_commands()
-  vim.api.nvim_create_user_command(
-    'PackAdd',
-    function(opts) vim.pack.add(opts.fargs) end,
-    { nargs = '+', desc = 'Add plugins (:PackAdd user/repo1 user2/repo2)' }
-  )
-
-  vim.api.nvim_create_user_command(
-    'PackDel',
-    function(opts) vim.pack.del(opts.fargs) end,
-    { nargs = '+', desc = 'Del plugins (:PackDel user/repo1 user2/repo2)' }
-  )
-
-  vim.api.nvim_create_user_command('PackUpdate', function(opts)
-    -- check if any arg is passed
-    if opts.args:match '%S' then
-      -- update specific plugins
-      local plugins = vim.split(opts.args, '%s+', { trimempty = true })
-      -- update only specific plugins
-      vim.pack.update(plugins)
-    else
-      -- updat all
-      vim.pack.update()
-    end
-  end, { nargs = '*', desc = 'Update plugins (:PackUpdate user/repo1 user2/repo2)' })
-end
 
 -------------------------------------------------------------
 --- TREESITTER, MASON, AND LSP SETUPS
@@ -826,7 +845,7 @@ local function setup_lsp()
   vim.lsp.enable(ensure_installed)
 
   nmap('grd', vim.lsp.buf.definition, 'Go to definition', opts)
-  nmap('grf', vim.lsp.buf.format, 'Format local buffer', opts)
+  nmap('grf', ':FormatAsync<CR>', 'Format current buffer asynchronously', opts)
 end
 
 -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
@@ -1044,7 +1063,7 @@ setup_quickfix()
 setup_vim()
 setup_theme()
 
-create_pack_commands()
+setup_custom_commands()
 
 setup_treesitter()
 setup_mason()

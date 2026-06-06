@@ -374,10 +374,10 @@ local function setup_base()
   nmap('j', "v:count == 0 ? 'gj' : 'j'", 'Down (wrap-aware)', expr)
   nmap('k', "v:count == 0 ? 'gk' : 'k'", 'Up (wrap-aware)', expr)
 
-  nmap('<left>', '<cmd>echo "Use h to move!!"<CR>')
-  nmap('<right>', '<cmd>echo "Use l to move!!"<CR>')
-  nmap('<up>', '<cmd>echo "Use k to move!!"<CR>')
-  nmap('<down>', '<cmd>echo "Use j to move!!"<CR>')
+  nmap('<left>', '<CMD>echo "Use h to move!!"<CR>')
+  nmap('<right>', '<CMD>echo "Use l to move!!"<CR>')
+  nmap('<up>', '<CMD>echo "Use k to move!!"<CR>')
+  nmap('<down>', '<CMD>echo "Use j to move!!"<CR>')
 
   -- TODO: move below lines to better setup function
 
@@ -388,7 +388,7 @@ local function setup_base()
     require('undotree').open()
   end, 'Undotree')
 
-  nmap('<leader>rx', '<cmd>!chmod +x %<CR>', 'Make file executable')
+  nmap('<leader>rx', '<CMD>!chmod +x %<CR>', 'Make file executable')
 
   nmap('<leader>xx', ':@<CR>', 'Executes last command')
 
@@ -429,7 +429,7 @@ end
 local function setup_search()
   -- clear highlights on search when pressing <esc> in normal mode
   --  NOTE `:help hlsearch`
-  nmap('<esc>', '<cmd>nohlsearch<cr>')
+  nmap('<esc>', '<CMD>nohlsearch<CR>')
 
   nmap('n', 'nzzzv', 'Next search result with cursor centered')
   nmap('N', 'Nzzzv', 'Previous search result with cursor centered')
@@ -442,10 +442,10 @@ end
 -------------------------------------------------------------
 
 local function setup_quickfix()
-  nmap('<A-n>', '<cmd>cnext<CR>', 'Next Place in QuickFix List')
-  nmap('<A-p>', '<cmd>cprev<CR>', 'Prev Place in QuickFix List')
+  nmap('<A-n>', '<CMD>cnext<CR>', 'Next Place in QuickFix List')
+  nmap('<A-p>', '<CMD>cprev<CR>', 'Prev Place in QuickFix List')
 
-  nmap('<leader>co', '<cmd>copen<CR>', 'Open Quickfix List')
+  nmap('<leader>co', '<CMD>copen<CR>', 'Open Quickfix List')
 
   -- Clear and close quickfix list completely
   nmap('<leader>cq', function()
@@ -656,15 +656,15 @@ end
 -------------------------------------------------------------
 
 local function setup_vim()
-  nmap('<leader>vc', ':e ~/.config/nvim/init.lua<cr>', 'configure')
+  nmap('<leader>vc', ':e ~/.config/nvim/init.lua<CR>', 'configure')
 
-  nmap('<leader>vv', ':w<cr>:source ~/.config/nvim/init.lua<cr><Esc>', 'source')
+  nmap('<leader>vv', ':lua vim.lsp.buf.format()<CR>:w<CR>:so %<CR>:nohlsearch<CR>', 'source')
 
-  nmap('<leader>vn', ':e ~/.config/nvim/NOTES.md<cr>', 'NOTES.md')
+  nmap('<leader>vn', ':e ~/.config/nvim/NOTES.md<CR>', 'NOTES.md')
 
-  nmap('<leader>vt', ':e ~/.config/nvim/TOOLS.md<cr>', 'TOOLS.md')
+  nmap('<leader>vt', ':e ~/.config/nvim/TOOLS.md<CR>', 'TOOLS.md')
 
-  nmap('<leader>vu', ':packupdate<cr>', 'update')
+  nmap('<leader>vu', ':packupdate<CR>', 'update')
 end
 
 -------------------------------------------------------------
@@ -785,7 +785,7 @@ end
 
 -- NOTE `:h lsp`
 local function setup_lsp()
-  nmap('<leader>ll', '<C-w>s:e ~/.local/state/nvim/lsp.log<cr>G', 'Open lsp.log')
+  nmap('<leader>ll', '<C-w>s:e ~/.local/state/nvim/lsp.log<CR>G', 'Open lsp.log')
 
   -- local opts = event.buf
   local opts = {}
@@ -912,7 +912,7 @@ local function setup_mini_files()
     },
   }
 
-  nmap('.', '<cmd>lua MiniFiles.open()<CR>', 'Mini file explorer')
+  nmap('.', '<CMD>lua MiniFiles.open()<CR>', 'Mini file explorer')
 
   nmap('<C-.>', function()
     MiniFiles.open(vim.api.nvim_buf_get_name(0), false)
@@ -1001,9 +1001,9 @@ local function setup_mini_diff()
 
   MiniDiff.setup {}
 
-  nmap('<leader>gg', '<cmd>tabnew | Git | only<cr>', 'Open fugitive tab')
+  nmap('<leader>gg', '<CMD>tabnew | Git | only<CR>', 'Open fugitive tab')
 
-  nmap('<leader>gd', '<cmd>Gvdiffsplit<CR>', 'Git diff split')
+  nmap('<leader>gd', '<CMD>Gvdiffsplit<CR>', 'Git diff split')
 
   -- FIXME: not working
   nmap('<leader>gh', 'Vgh<Esc>', 'Stage current line')

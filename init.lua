@@ -357,69 +357,18 @@ local function setup_options()
 end
 
 -------------------------------------------------------------
--- IMPORTS
--------------------------------------------------------------
-
-vim.pack.add {
-  'https://github.com/mg979/vim-visual-multi',
-  'https://github.com/folke/lazydev.nvim',
-  -- 'https://github.com/rafamadriz/friendly-snippets',
-  'https://github.com/nvim-mini/mini.nvim',
-  { src = 'https://github.com/nvim-treesitter/nvim-treesitter', branch = 'main', build = ':TSUpdate' },
-  'https://github.com/neovim/nvim-lspconfig',
-  'https://github.com/mason-org/mason.nvim',
-  'https://github.com/tpope/vim-fugitive',
-}
-
-local MiniDiff = require 'mini.diff'
-local MiniCompletion = require 'mini.completion'
-local MiniFiles = require 'mini.files'
-local MiniPick = require 'mini.pick'
-local MiniExtra = require 'mini.extra'
-local MiniIcons = require 'mini.icons'
-local MiniSplitjoin = require 'mini.splitjoin'
--- local MiniSnippets = require 'mini.snippets'
-local MiniHiPatterns = require('mini.hipatterns')
--- local MiniMap = require('mini.map')
--- local MiniComment = require('mini.comment')
-
--------------------------------------------------------------
 -- HELPERS
 -------------------------------------------------------------
 
-local function is_code(buf)
-  buf = buf or vim.api.nvim_get_current_buf()
-  local buftype = vim.bo[buf].buftype
-  local filetype = vim.bo[buf].filetype
-  return buftype == ''
-      and filetype ~= 'markdown'
-      and filetype ~= 'md'
-      and filetype ~= 'text'
-      and filetype ~= 'txt'
-      and filetype ~= 'log'
-end
-
-local function get_current_theme_index()
-  local current_theme = vim.g.colors_name
-  for i, theme in ipairs(themes) do
-    if theme == current_theme then
-      return i
-    end
-  end
-  -- If current theme is not in the list (or none is set), default to the first one
-  return 1
-end
-
 local function contains(string, substring)
-  return string:lower():find(substring) ~= nil
+  return string:lower():find(substring:lower()) ~= nil
 end
 
-local function map_array(list, func)
-  local new_list = {}
-  for i, v in ipairs(list) do
-    new_list[i] = func(v)
+local function starts_with(str, substr)
+  if not str or not substr then
+    return false
   end
-  return new_list
+  return str:sub(1, #substr) == substr
 end
 
 local clue_window_width = 0
@@ -428,7 +377,7 @@ local clue_window_width = 0
 ---@param text ?string
 ---@return string
 local function button(text)
-  if text == nil then return text end
+  if type(text) ~= 'string' then return text end
 
   local function mini(category, name) return ' ' .. MiniIcons.get(category, name) .. ' ' .. text end
 
@@ -436,16 +385,18 @@ local function button(text)
     clue_window_width = text:len() + 3
   end
 
-  local starts_with_icon = text:sub(1, 1):byte() > 127
+  local starts_with_icon = vim.trim(text):sub(1, 1):byte() > 127
 
   if starts_with_icon then return text end
 
+  if contains(text, 'hunk') then return mini('filetype', 'git') end
   if contains(text, 'git') then return mini('filetype', 'git') end
   if contains(text, 'neovim') then return mini('file', 'init.lua') end
   if contains(text, 'diff') then return mini('filetype', 'diff') end
   if contains(text, 'terminal') then return '🗔  ' .. text end
   if contains(text, 'terminal') then return mini('filetype', 'sh') end
   if contains(text, 'execute') then return mini('filetype', 'sh') end
+  if contains(text, 'comment') then return '💬 ' .. text end
   if contains(text, 'mark') then return '📌 ' .. text end
   if contains(text, 'mark') then return '⚓ ' .. text end
   if contains(text, 'mark') then return '🏷 ' .. text end
@@ -455,6 +406,7 @@ local function button(text)
   if contains(text, 'theme') then return '🎨 ' .. text end
   if contains(text, 'keyboard') then return '⌨  ' .. text end
   if contains(text, 'keymap') then return '⌨  ' .. text end
+  if contains(text, 'sleep') then return '💤 ' .. text end
   if contains(text, 'stage ') then return '➕ ' .. text end
   if contains(text, 'add') then return '➕ ' .. text end
   if contains(text, 'reset ') then return '➖ ' .. text end
@@ -479,7 +431,10 @@ local function button(text)
   if contains(text, 'package') then return '📦 ' .. text end
   if contains(text, 'replace') then return '♻️ ' .. text end
   if contains(text, 'setting') then return '⚙️ ' .. text end
-  if contains(text, 'search') then return '🔍 ' .. text end
+  if contains(text, 'highlight') then return '🟨 ' .. text end
+  if contains(text, 'search') then return '🔎 ' .. text end
+  if contains(text, 'find left') then return '🔍 ' .. text end
+  if contains(text, 'find right') then return '🔎 ' .. text end
   if contains(text, 'terminal') then return '🖥 ' .. text end
   if contains(text, 'file explorer') then return '📂 ' .. text end
   if contains(text, 'file') then return '📝 ' .. text end
@@ -490,6 +445,74 @@ local function button(text)
   if contains(text, 'open') then return '📂 ' .. text end
 
   return '   ' .. text
+end
+
+local vim_keymap_set = vim.keymap.set
+local keymap_adder = ''
+vim.keymap.set = function(modes, lhs, rhs, opts)
+  opts = opts or {}
+  local desc = button(opts.desc)
+  if type(desc) ~= 'string' and type(rhs) == 'string' then
+    desc = rhs
+  end
+  if type(desc) == 'string' and keymap_adder ~= '' and not starts_with(lhs, '<leader>') then
+    if starts_with(keymap_adder, '#') then
+      desc = desc .. ' 👉 ' .. keymap_adder
+    else
+      desc = desc .. ' ' .. keymap_adder
+    end
+  end
+  local is_overriding = false
+  local mode_list = type(modes) == 'table' and modes or { modes }
+  for _, mode in ipairs(mode_list) do
+    if vim.fn.mapcheck(lhs, mode) ~= '' then
+      is_overriding = true
+      break
+    end
+  end
+  if is_overriding and type(desc) == 'string' then
+    desc = desc .. ' 👺'
+  end
+  opts.desc = desc
+  return vim_keymap_set(modes, lhs, rhs, opts)
+end
+
+local function is_code(buf)
+  buf = buf or vim.api.nvim_get_current_buf()
+  local buftype = vim.bo[buf].buftype
+  local filetype = vim.bo[buf].filetype
+  return buftype == ''
+      and filetype ~= 'markdown'
+      and filetype ~= 'md'
+      and filetype ~= 'text'
+      and filetype ~= 'txt'
+      and filetype ~= 'log'
+end
+
+local function get_current_theme_index()
+  local current_theme = vim.g.colors_name
+  for i, theme in ipairs(themes) do
+    if theme == current_theme then
+      return i
+    end
+  end
+  -- If current theme is not in the list (or none is set), default to the first one
+  return 1
+end
+
+local function map_array(list, func)
+  local new_list = {}
+  for i, v in ipairs(list) do
+    new_list[i] = func(v)
+  end
+  return new_list
+end
+
+--- generates a keymap rhs as help
+---@param name string
+---@return string
+local function h(name)
+  return ':h ' .. name .. '<CR>'
 end
 
 local n = 'n'
@@ -512,6 +535,7 @@ local function map(lhs, rhs, desc, ...)
     desc = button(desc),
     noremap = true,
   }
+  local help = nil
   for _, value in ipairs { ... } do
     if value == silent then
       opts.silent = true
@@ -540,12 +564,22 @@ local function map(lhs, rhs, desc, ...)
       modes[#modes + 1] = o
     elseif value == x then
       modes[#modes + 1] = x
+    elseif type(value) == 'string' and starts_with(value, ':h ') then
+      help = value
     elseif type(value) == 'table' then
       for k, val in pairs(value) do
         opts[k] = val
       end
     else
       vim.print('invalid value for map `' .. lhs .. '`. value = `' .. value .. '`')
+    end
+  end
+  if help ~= nil then
+    for i, mode in ipairs(modes) do
+      -- vim.keymap.set(n, '<leader>h' .. mode .. lhs, help, { desc = desc })
+      vim.keymap.set(n, '<C-M-' .. mode .. '>' .. lhs, help, {
+        desc = 'Help for `' .. desc .. '`'
+      })
     end
   end
   vim.keymap.set(modes, lhs, rhs, opts)
@@ -556,6 +590,33 @@ local function imap(l, r, d, ...) map(l, r, d, i, ...) end
 local function tmap(l, r, d, ...) map(l, r, d, t, ...) end
 local function vmap(l, r, d, ...) map(l, r, d, v, ...) end
 local function xmap(l, r, d, ...) map(l, r, d, x, ...) end
+
+-------------------------------------------------------------
+-- IMPORTS
+-------------------------------------------------------------
+
+vim.pack.add {
+  'https://github.com/mg979/vim-visual-multi',
+  'https://github.com/folke/lazydev.nvim',
+  -- 'https://github.com/rafamadriz/friendly-snippets',
+  'https://github.com/nvim-mini/mini.nvim',
+  { src = 'https://github.com/nvim-treesitter/nvim-treesitter', branch = 'main', build = ':TSUpdate' },
+  'https://github.com/neovim/nvim-lspconfig',
+  'https://github.com/mason-org/mason.nvim',
+  'https://github.com/tpope/vim-fugitive',
+}
+
+local MiniDiff = require 'mini.diff'
+local MiniCompletion = require 'mini.completion'
+local MiniFiles = require 'mini.files'
+local MiniPick = require 'mini.pick'
+local MiniExtra = require 'mini.extra'
+local MiniIcons = require 'mini.icons'
+local MiniSplitjoin = require 'mini.splitjoin'
+-- local MiniSnippets = require 'mini.snippets'
+local MiniHiPatterns = require('mini.hipatterns')
+-- local MiniMap = require('mini.map')
+-- local MiniComment = require('mini.comment')
 
 -------------------------------------------------------------
 -- CUSTOM FUNCTIONS
@@ -952,7 +1013,7 @@ local function setup_keymaps(plugin_name, plugin_payload)
 
   nmap('<leader>yy', 'mzggVGy`z', 'Yank whole content')
 
-  nmap('<leader>yc', 'g<ggVGy:q<CR>', 'Yank cmdline message') -- FIXME:
+  nmap('<leader>yc', 'g<ggVGy<C-w>w', 'Yank cmdline message', remap) -- FIXME:
 
   -- [[ EDITING ]]
 
@@ -1005,11 +1066,11 @@ local function setup_keymaps(plugin_name, plugin_payload)
   nmap('H', ':bprevious<CR>', 'Go to previous buffer')
   nmap('L', ':bnext<CR>', 'Go to next next')
 
-  nmap('[<leader>', 'gT', 'Go to previous tab')
-  nmap(']<leader>', 'gt', 'Go to next tab')
+  -- nmap('[<leader>', 'gT', 'Go to previous tab')
+  -- nmap(']<leader>', 'gt', 'Go to next tab')
 
-  nmap('[w', '<C-w>W', 'Go to the previous window')
-  nmap(']w', '<C-w>w', 'Go to to the next window')
+  -- nmap('[w', '<C-w>W', 'Go to the previous window')
+  -- nmap(']w', '<C-w>w', 'Go to to the next window')
 
   nmap('<C-h>', '<C-w><C-h>', 'Go to to the left window')
   nmap('<C-l>', '<C-w><C-l>', 'Go to to the right window')
@@ -1084,11 +1145,25 @@ local function setup_keymaps(plugin_name, plugin_payload)
 
   -- [[ GIT ]]
 
-  nmap('<leader>gg', '<CMD>Git | only<CR>', 'Open fugitive tab')
+  nmap(
+    '<leader>gg',
+    '<CMD>Git | only<CR><ESC>g?<C-w>L<C-w>8<C-w>h',
+    'Status',
+    h('fugitive-navigation-map'),
+    remap
+  )
 
   nmap('<leader>gd', '<CMD>Gvdiffsplit<CR><C-w>l', 'Git diff split')
 
-  nmap('<leader>gc', ':!git commit -m ""<Left>', 'Commit staged files')
+  nmap('<leader>gbc', ':Git checkout ', 'Checkout to branch')
+
+  nmap('<leader>gbd', ':Git branch -D ', 'Delete branch')
+
+  nmap('<leader>gm', ':Git commit<CR>', 'Commit')
+
+  nmap('<leader>gl', ':Gclog<CR>', 'Logs')
+
+  nmap('<leader>gb', ':Git blame<CR><C-w>l', 'Blame')
 
   -- vim.keymap.set("n", "]h", function() MiniDiff.goto_hunk("next") end, { desc = "Next git hunk" })
   -- vim.keymap.set("n", "[h", function() MiniDiff.goto_hunk("prev") end, { desc = "Prev git hunk" })
@@ -1133,8 +1208,6 @@ end
 
 -- NOTE: `:h lsp`
 local function setup_lsp()
-  nmap('<leader>ll', '<C-w>s:e ~/.local/state/nvim/lsp.log<CR>G', 'Open lsp.log')
-
   -- local opts = event.buf
   local opts = {}
 
@@ -1191,7 +1264,9 @@ local function setup_lsp()
   })
   vim.lsp.enable(ensure_installed)
 
+  -- TODO move to setup_keymaps
   nmap('grd', vim.lsp.buf.definition, 'Go to definition', opts)
+  nmap('<leader>ll', '<C-w>s:e ~/.local/state/nvim/lsp.log<CR>G', 'Open lsp.log')
   nmap('grf', ':FormatAsync<CR>', 'Format current buffer asynchronously', opts)
 end
 
@@ -1199,9 +1274,11 @@ end
 -- INTEGRATE SETUPS
 -------------------------------------------------------------
 
-require('vim._core.ui2').enable {} -- NOTE: `g<` jumps to commandline output
+-- NOTE: `g<` jumps to commandline output
+require('vim._core.ui2').enable {}
 
-vim.loader.enable()                -- Enable faster startup by caching compiled Lua modules
+-- Enable faster startup by caching compiled Lua modules
+vim.loader.enable()
 
 vim.cmd('colorscheme ' .. themes[1])
 
@@ -1213,14 +1290,18 @@ setup_custom_commands()
 
 setup_auto_commands()
 
+keymap_adder = '#treesitter'
 require 'nvim-treesitter'.install(ensure_syntax_supported)
 
+keymap_adder = '#mason'
 require('mason').setup()
 
+keymap_adder = '#lsp'
 setup_lsp()
 
 -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
 -- used for completion, annotations and signatures of Neovim apis
+keymap_adder = '#lazydev'
 require('lazydev').setup {
   library = {
     -- Load luvit types when the `vim.uv` word is found
@@ -1231,6 +1312,7 @@ require('lazydev').setup {
 ------------------------------------------------------------- TEXT EDITING
 
 -- Split and join arguments
+keymap_adder = '#mini.splitjoin'
 MiniSplitjoin.setup({
   mappings = {
     toggle = '',
@@ -1240,34 +1322,61 @@ MiniSplitjoin.setup({
 })
 
 -- Completion and signature help
+keymap_adder = '#mini.completion'
 MiniCompletion.setup {
   lsp_completion = {
     auto_setup = true,
   },
 }
 
-require('mini.move').setup({})     -- Move any selection in any direction
-require('mini.pairs').setup({})    -- Auto pairs
-require('mini.surround').setup({}) -- Surround actions
+-- Move any selection in any direction
+keymap_adder = '#mini.move'
+require('mini.move').setup({})
 
--- Manage and expand snippets
+-- Auto pairs
+keymap_adder = '#mini.pairs'
+require('mini.pairs').setup({})
+
+-- Surround actions
+keymap_adder = '#mini.surround'
+require('mini.surround').setup({})
+
+-- --  Manage and expand snippets
+-- keymap_adder = '#mini.snippets'
 -- MiniSnippets.setup {
 --   snippets = {
---     MiniSnippets.gen_loader.from_lang(), -- loads friendly-snippets automatically
+--     -- loads friendly-snippets automatically
+--     MiniSnippets.gen_loader.from_lang(),
 --   },
 -- }
 -- MiniSnippets.start_lsp_server { match = false }
 
--- MiniComment.setup({})               -- Comment lines
--- require('mini.ai').setup({})        -- Extend and create `a`/`i` textobjects
--- require('mini.align').setup({})     -- Align text interactively
--- require('mini.keymap').setup({})    -- Special key mappings
--- require('mini.operators').setup({}) -- Text edit operators
+-- --  Comment lines
+-- keymap_adder = '#mini.comment'
+-- MiniComment.setup({})
+
+-- --  Extend and create `a`/`i` textobjects
+-- keymap_adder = '#mini.ai'
+-- require('mini.ai').setup({})
+
+-- --  Align text interactively
+-- keymap_adder = '#mini.align'
+-- require('mini.align').setup({})
+
+-- --  Special key mappings
+-- keymap_adder = '#mini.keymap'
+-- require('mini.keymap').setup({})
+
+-- -- Text edit operators
+-- keymap_adder = '#mini.operators'
+-- require('mini.operators').setup({})
 
 ------------------------------------------------------------- APPEARANCE
 
+keymap_adder = '#mini.icons'
 MiniIcons.setup {}
 
+keymap_adder = '#mini.animate'
 require 'mini.animate'.setup {
   cursor = { enable = animate },
   scroll = { enable = false },
@@ -1276,6 +1385,7 @@ require 'mini.animate'.setup {
   close = { enable = animate },
 }
 
+keymap_adder = '#mini.hipatterns'
 MiniHiPatterns.setup({
   highlighters = {
     fixme     = { pattern = '%f[%w]()FIXME()%f[%W]', group = 'MiniHipatternsFixme' },
@@ -1286,16 +1396,29 @@ MiniHiPatterns.setup({
   },
 })
 
+keymap_adder = '#mini.statusline'
 local statusline = require 'mini.statusline'
 statusline.setup { use_icons = vim.g.have_nerd_font }
 statusline.section_location = function() return '%2l:%-2v/%2L' end
 
-require('mini.cursorword').setup({})  -- Autohighlight word under cursor
-require('mini.indentscope').setup({}) -- Visualize and work with indent scope
-require('mini.notify').setup({})      -- Show notifications
-require('mini.trailspace').setup({})  -- Trailspace (highlight and remove)
+-- Autohighlight word under cursor
+keymap_adder = '#mini.cursorword'
+require('mini.cursorword').setup({})
+
+-- Visualize and work with indent scope
+keymap_adder = '#mini.indentscope'
+require('mini.indentscope').setup({})
+
+-- Show notifications
+keymap_adder = '#mini.notify'
+require('mini.notify').setup({})
+
+-- Trailspace (highlight and remove)
+keymap_adder = '#mini.trailspace'
+require('mini.trailspace').setup({})
 
 -- Show buffers as tabs
+keymap_adder = '#mini.tabline'
 require('mini.tabline').setup {
   format = function(buf_id, label)
     -- add "*" suffix for modified buffers
@@ -1304,7 +1427,8 @@ require('mini.tabline').setup {
   end
 }
 
--- Window with buffer text overview
+-- -- Window with buffer text overview
+-- keymap_adder = '#mini.map'
 -- MiniMap.setup({
 --   integrations = {
 --     MiniMap.gen_integration.builtin_search(),
@@ -1313,29 +1437,68 @@ require('mini.tabline').setup {
 --   }
 -- })
 
--- require('mini.hues').setup {}      -- Generate configurable color scheme
--- require('mini.colors').setup {}    -- Tweak and save any color scheme
--- require('mini.base16').setup {}    -- Base16 colorscheme creation
--- require('mini.starter').setup({})  -- Start screen
+-- -- Generate configurable color scheme
+-- keymap_adder = '#mini.hues'
+-- require('mini.hues').setup {}
+
+-- -- Tweak and save any color scheme
+-- keymap_adder = '#mini.colors'
+-- require('mini.colors').setup {}
+
+-- -- Base16 colorscheme creation
+-- keymap_adder = '#mini.base16'
+-- require('mini.base16').setup {}
+
+-- -- Start screen
+-- keymap_adder = '#mini.starter'
+-- require('mini.starter').setup({})
 
 ------------------------------------------------------------- GENERAL WORKFLOW
 
-require('mini.basics').setup({})                   -- Common configuration presets
-require('mini.bracketed').setup({})                -- Go forward/backward with square brackets
-require('mini.bufremove').setup({})                -- Buffer removing (unshow, delete, wipeout), which saves window layout
-require('mini.jump').setup {}                      -- Jump to next/previous single character
-require('mini.jump2d').setup {}                    -- Jump within visible lines
-require('mini.sessions').setup { autoread = true } -- Session management
-require('mini.misc').setup {}                      -- Miscellaneous functions
-MiniPick.setup()                                   -- Pick anything
-MiniExtra.setup()                                  -- Extra 'mini.nvim' functionality
+-- Common configuration presets
+keymap_adder = '#mini.basics'
+require('mini.basics').setup({})
+
+-- Go forward/backward with square brackets
+keymap_adder = '#mini.bracketed'
+require('mini.bracketed').setup({})
+
+-- Buffer removing (unshow, delete, wipeout), which saves window layout
+keymap_adder = '#mini.bufremove'
+require('mini.bufremove').setup({})
+
+-- Jump to next/previous single character
+keymap_adder = '#mini.jump'
+require('mini.jump').setup {}
+
+-- Jump within visible lines
+keymap_adder = '#mini.jump2d'
+require('mini.jump2d').setup {}
+
+-- Session management
+keymap_adder = '#mini.sessions'
+require('mini.sessions').setup { autoread = true }
+
+-- Miscellaneous functions
+keymap_adder = '#mini.misc'
+require('mini.misc').setup {}
+
+-- Pick anything
+keymap_adder = '#mini.pick'
+MiniPick.setup()
+
+-- Extra 'mini.nvim' functionality
+keymap_adder = '#mini.extra'
+MiniExtra.setup()
 
 -- Command line tweaks
+keymap_adder = '#mini.cmdline'
 require('mini.cmdline').setup {
   autocorrect = { enable = false },
 }
 
 -- Navigate and manipulate file system
+keymap_adder = '#mini.files'
 MiniFiles.setup {
   -- TODO: move them to keymap
   mappings = {
@@ -1347,6 +1510,7 @@ MiniFiles.setup {
 }
 
 -- Work with diff hunks
+keymap_adder = '#mini.diff'
 MiniDiff.setup {
   view = {
     style = 'sign',
@@ -1356,6 +1520,7 @@ MiniDiff.setup {
 }
 
 -- Show next key clues
+keymap_adder = '#mini.clue'
 local MiniClue = require('mini.clue')
 local function improve_clues(clues)
   return map_array(clues, function(clue)
@@ -1366,6 +1531,10 @@ end
 MiniClue.setup({
   triggers = {
     { mode = { 'n', 'x' }, keys = '<Leader>' },
+    { mode = { 'n' },      keys = '<C-S-n>' },
+    { mode = { 'x' },      keys = '<C-S-x>' },
+    { mode = { 'i' },      keys = '<C-S-i>' },
+    { mode = { 'c' },      keys = '<C-S-c>' },
     { mode = 'n',          keys = '[' },     -- previous
     { mode = 'n',          keys = ']' },     -- next
     { mode = 'i',          keys = '<C-x>' }, -- Built-in completion
@@ -1376,10 +1545,11 @@ MiniClue.setup({
     { mode = { 'i', 'c' }, keys = '<C-r>' }, -- Registers
     { mode = 'n',          keys = '<C-w>' },
     { mode = { 'n', 'x' }, keys = 'z' },
-    { mode = { 'n' },      keys = 's' },
-    -- { mode = { 'n' },      keys = 'c' },
-    -- { mode = { 'n' },      keys = 'd' },
-    -- { mode = { 'n' },      keys = 'y' },
+    { mode = { 'n', 'x' }, keys = 'Z' },
+    { mode = { 'n', 'x' }, keys = 's' },
+    -- { mode = { 'n' },      keys = 'c' }, -- interupts vim-visual-multi
+    -- { mode = { 'n' },      keys = 'd' }, -- interupts vim-visual-multi
+    -- { mode = { 'n' },      keys = 'y' }, -- interupts vim-visual-multi
   },
   clues = {
     -- Enhance this by adding descriptions for <Leader> mapping groups
@@ -1390,8 +1560,6 @@ MiniClue.setup({
     improve_clues(MiniClue.gen_clues.registers()),
     improve_clues(MiniClue.gen_clues.windows()),
     improve_clues(MiniClue.gen_clues.z()),
-    { mode = 'n', keys = '[<leader>', desc = button('Add empty line above cursor') },
-    { mode = 'n', keys = ']<leader>', desc = button('Add empty line below cursor') },
     { mode = 'n', keys = '<leader>c', desc = button('+Quickfix') },
     { mode = 'n', keys = '<leader>g', desc = button('+Git') },
     { mode = 'n', keys = '<leader>m', desc = button('+Mason') },
@@ -1409,16 +1577,37 @@ MiniClue.setup({
   },
 })
 
--- require('mini.deps').setup()   -- Plugin manager
--- require('mini.git').setup()    -- Git integration
--- require('mini.input').setup()  -- Get user input
--- require('mini.visits').setup() -- Track and reuse file system visits
+-- -- Plugin manager
+-- keymap_adder = '#mini.deps'
+-- require('mini.deps').setup()
+
+-- -- Git integration
+-- keymap_adder = '#mini.git'
+-- require('mini.git').setup()
+
+-- -- Get user input
+-- keymap_adder = '#mini.input'
+-- require('mini.input').setup()
+
+-- -- Track and reuse file system visits
+-- keymap_adder = '#mini.visits'
+-- require('mini.visits').setup()
 
 --------------------------------------------------------------- MINI OTHERS
 
--- require('mini.doc').setup()  -- Generate Neovim help files
--- require('mini.test').setup() -- Test Neovim plugins
+-- -- Fuzzy matching
+keymap_adder = '#mini.fuzzy'
+require('mini.fuzzy').setup {}
+
+-- -- Generate Neovim help files
+-- keymap_adder = '#mini.doc'
+-- require('mini.doc').setup()
+
+-- -- Test Neovim plugins
+-- keymap_adder = '#mini.test'
+-- require('mini.test').setup()
 
 ---------------------------------------------------------------
 
+keymap_adder = '😎'
 setup_keymaps()

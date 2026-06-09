@@ -1414,6 +1414,11 @@ MiniClue.setup({
 -- require('mini.input').setup()  -- Get user input
 -- require('mini.visits').setup() -- Track and reuse file system visits
 
---------------------------------------------------------------- OTHER
+--------------------------------------------------------------- MINI OTHERS
+
+-- require('mini.doc').setup()  -- Generate Neovim help files
+-- require('mini.test').setup() -- Test Neovim plugins
+
+---------------------------------------------------------------
 
 setup_keymaps()

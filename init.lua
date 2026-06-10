@@ -886,16 +886,6 @@ end
 -- [ mini.jump2d ]
 -- NOTE: n`<CR>` starts motion
 --
--- [ mini.diff ]
--- NOTE: `[h` previous hunk
--- NOTE: `]h` next hunk
--- NOTE: `[H` first hunk
--- NOTE: `]H` last hunk
--- NOTE: `Vgh` or `ghip` stage hunk
--- NOTE: `VgH` or `gHip` reset hunk
--- NOTE: `ghl` stage line hunk
--- NOTE: `gHl` reset line hunk
---
 -- [ mini.snippets ]
 -- NOTE: `<C-l>` next placeholder
 -- NOTE: `<C-h>` prev placeholder
@@ -1145,21 +1135,35 @@ local function setup_keymaps(plugin_name, plugin_payload)
 
   -- [[ GIT ]]
 
+  -- [ mini.diff ]
+  -- NOTE: `[h` previous hunk
+  -- NOTE: `]h` next hunk
+  -- NOTE: `[H` first hunk
+  -- NOTE: `]H` last hunk
+  -- NOTE: `ghgh` applies hunk range under cursor.
+  -- NOTE: `gHgh` resets hunk range under cursor.
+  -- NOTE: `dgh` deletes hunk range under cursor
+  -- NOTE: `ghip` stage hunk inside current paragraph
+  -- NOTE: `gHip` reset hunk inside current paragraph
+  -- NOTE: `Vgh` stage selected hunk
+  -- NOTE: `VgH` reset selected hunk
+  -- NOTE: `ghl` stage line hunk
+  -- NOTE: `gHl` reset line hunk
+
   nmap(
     '<leader>gg',
-    '<CMD>Git | only<CR><ESC>g?<C-w>L<C-w>8<C-w>h',
+    '<CMD>Git | only<CR>',
     'Status',
-    h('fugitive-navigation-map'),
-    remap
+    h('fugitive-maps')
   )
 
-  nmap('<leader>gd', '<CMD>Gvdiffsplit<CR><C-w>l', 'Git diff split')
+  nmap('<leader>gd', '<CMD>Gvdiffsplit<CR><C-w>l', 'Diff')
 
   nmap('<leader>gbc', ':Git checkout ', 'Checkout to branch')
 
   nmap('<leader>gbd', ':Git branch -D ', 'Delete branch')
 
-  nmap('<leader>gm', ':Git commit<CR>', 'Commit')
+  nmap('<leader>gc', ':Git commit<CR>i', 'Commit')
 
   nmap('<leader>gl', ':Gclog<CR>', 'Logs')
 
@@ -1460,8 +1464,8 @@ keymap_adder = '#mini.basics'
 require('mini.basics').setup({})
 
 -- Go forward/backward with square brackets
-keymap_adder = '#mini.bracketed'
-require('mini.bracketed').setup({})
+-- keymap_adder = '#mini.bracketed'
+-- require('mini.bracketed').setup({})
 
 -- Buffer removing (unshow, delete, wipeout), which saves window layout
 keymap_adder = '#mini.bufremove'

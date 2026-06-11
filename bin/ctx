@@ -1,0 +1,23 @@
+#!/bin/bash
+# Save this as ctx and make it executable with chmod +x ctx
+
+output=""
+
+for path in "$@"; do
+  if [ -d "$path" ]; then
+    files=$(find "$path" -type f)
+  else
+    files="$path"
+  fi
+
+  for file in $files; do
+    content=$(cat "$file")
+    output+="\`\`\`${file}\n${content}\n\`\`\`\n\n"
+  done
+done
+
+# Copy to clipboard (macOS: pbcopy, Linux: xclip or wl-copy)
+# echo -e "$output" | pbcopy  # macOS
+# echo -e "$output" | xclip -selection clipboard  # Linux with xclip
+echo -e "$output" | wl-copy  # Wayland
+

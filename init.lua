@@ -374,8 +374,8 @@ end
 local clue_window_width = 0
 
 --- turns text to button
----@param text ?string
----@return string
+---@param text string?
+---@return string?
 local function button(text)
   if type(text) ~= 'string' then return text end
 
@@ -401,6 +401,7 @@ local function button(text)
   if contains(text, 'mark') then return '⚓ ' .. text end
   if contains(text, 'mark') then return '🏷 ' .. text end
   if contains(text, 'case') then return '🗛  ' .. text end
+  if contains(text, 'line wrap') then return '↩️ ' .. text end
   if contains(text, 'health') then return '🏥 ' .. text end
   if contains(text, 'help') then return '🆘 ' .. text end
   if contains(text, 'theme') then return '🎨 ' .. text end
@@ -449,7 +450,8 @@ end
 
 local vim_keymap_set = vim.keymap.set
 local keymap_adder = ''
-vim.keymap.set = function(modes, lhs, rhs, opts)
+---@diagnostic disable-next-line: duplicate-set-field
+function vim.keymap.set(modes, lhs, rhs, opts)
   opts = opts or {}
   local desc = button(opts.desc)
   if type(desc) ~= 'string' and type(rhs) == 'string' then
@@ -470,7 +472,7 @@ vim.keymap.set = function(modes, lhs, rhs, opts)
       break
     end
   end
-  if is_overriding and type(desc) == 'string' then
+  if is_overriding and type(desc) == 'string' and not contains(desc, '👺') then
     desc = desc .. ' 👺'
   end
   opts.desc = desc
@@ -535,6 +537,7 @@ local function map(lhs, rhs, desc, ...)
     desc = button(desc),
     noremap = true,
   }
+  local lhs_arr = type(lhs) == 'table' and lhs or { lhs }
   local help = nil
   for _, value in ipairs { ... } do
     if value == silent then
@@ -571,18 +574,22 @@ local function map(lhs, rhs, desc, ...)
         opts[k] = val
       end
     else
-      vim.print('invalid value for map `' .. lhs .. '`. value = `' .. value .. '`')
+      vim.print('invalid value for map `' .. lhs_arr[1] .. '`. value = `' .. value .. '`')
     end
   end
   if help ~= nil then
-    for i, mode in ipairs(modes) do
-      -- vim.keymap.set(n, '<leader>h' .. mode .. lhs, help, { desc = desc })
-      vim.keymap.set(n, '<C-M-' .. mode .. '>' .. lhs, help, {
-        desc = 'Help for `' .. desc .. '`'
-      })
+    for _, mode in ipairs(modes) do
+      for _, _lhs in ipairs(lhs_arr) do
+        -- vim.keymap.set(n, '<leader>h' .. mode .. _lhs, help, { desc = desc })
+        vim.keymap.set(n, '<C-M-' .. mode .. '>' .. _lhs, help, {
+          desc = 'Help for `' .. desc .. '`'
+        })
+      end
     end
   end
-  vim.keymap.set(modes, lhs, rhs, opts)
+  for _, _lhs in ipairs(lhs_arr) do
+    vim.keymap.set(modes, _lhs, rhs, opts)
+  end
 end
 
 local function nmap(l, r, d, ...) map(l, r, d, n, ...) end
@@ -606,17 +613,21 @@ vim.pack.add {
   'https://github.com/tpope/vim-fugitive',
 }
 
-local MiniDiff = require 'mini.diff'
-local MiniCompletion = require 'mini.completion'
-local MiniFiles = require 'mini.files'
-local MiniPick = require 'mini.pick'
-local MiniExtra = require 'mini.extra'
-local MiniIcons = require 'mini.icons'
-local MiniSplitjoin = require 'mini.splitjoin'
--- local MiniSnippets = require 'mini.snippets'
-local MiniHiPatterns = require('mini.hipatterns')
--- local MiniMap = require('mini.map')
--- local MiniComment = require('mini.comment')
+vim.loader.enable()                -- Enable faster startup by caching compiled Lua modules
+
+require('vim._core.ui2').enable {} -- NOTE: `g<` jumps to commandline output
+
+local mini_diff = require 'mini.diff'
+local mini_completion = require 'mini.completion'
+local mini_files = require 'mini.files'
+local mini_pick = require 'mini.pick'
+local mini_extra = require 'mini.extra'
+local mini_icons = require 'mini.icons'
+local mini_splitjoin = require 'mini.splitjoin'
+-- local mini_snippets = require 'mini.snippets'
+local mini_hipatterns = require('mini.hipatterns')
+-- local mini_map = require('mini.map')
+-- local mini_comment = require('mini.comment')
 
 -------------------------------------------------------------
 -- CUSTOM FUNCTIONS
@@ -665,6 +676,7 @@ local function toggle_floating_terminal()
 
   local term_augroup = vim.api.nvim_create_augroup('FloatingTermLeave_' .. fts.win,
     { clear = true })
+
   vim.api.nvim_create_autocmd('BufLeave', {
     group = term_augroup,
     buffer = fts.buf,
@@ -679,7 +691,7 @@ local function toggle_floating_terminal()
 end
 
 local zen = false
-function toggle_zen()
+local function toggle_zen()
   zen = not zen
 
   -- GLOBAL OPTIONS (Apply instantly to the whole Neovim instance)
@@ -710,6 +722,483 @@ function toggle_zen()
       vim.api.nvim_set_option_value('relativenumber', not zen, opts)
       vim.api.nvim_set_option_value('signcolumn', zen and 'no' or 'yes', opts)
     end
+  end
+end
+
+-------------------------------------------------------------
+-- KEYMAPS
+-------------------------------------------------------------
+
+-- [ mini.jump2d ]
+-- NOTE: n`<CR>` starts motion
+--
+-- [ mini.snippets ]
+-- NOTE: `<C-l>` next placeholder
+-- NOTE: `<C-h>` prev placeholder
+--
+-- [ mini.surround ]
+-- NOTE: `sr'"` replaces ' with "
+-- NOTE: `sd"` deletes surrounding (")
+-- NOTE: `viwsa'` or `saiw'` surrounds selected with `'`
+-- NOTE: `saiwtp className="m2"<CR>` surrounds selected with `<p className="m2">` and `</p>`
+-- NOTE: `srtth3<CR>` replaces p tag with h3
+-- NOTE: `srtb` deletes tags around and surrounds with ()
+-- NOTE: `srb{` deletes () around and surrounds with {}
+-- NOTE: `sd{` deletes {} around
+--
+-- [ mini.files ]
+-- NOTE: close = "q",
+-- NOTE: create_file = "o",
+-- NOTE: rename_file = "ciw",
+-- NOTE: delete_file = "dd",
+-- NOTE: copy_file = "yyp",
+-- NOTE: apply_changes = "=y",
+--
+local function setup_keymaps()
+  -- [[ OVERRIDES ]]
+
+  nmap('<ESC>', '<CMD>nohlsearch<CR>', 'Clear highlight search') -- NOTE: `:help hlsearch`
+
+  nmap('<left>', '<CMD>echo "Use h to move!!"<CR>')
+  nmap('<right>', '<CMD>echo "Use l to move!!"<CR>')
+  nmap('<up>', '<CMD>echo "Use k to move!!"<CR>')
+  nmap('<down>', '<CMD>echo "Use j to move!!"<CR>')
+
+  -- [[ UNCATEGORIZED ]]
+
+  nmap('<leader>oh', ':checkhealth<CR>', 'Health Check')
+  nmap('<leader>rx', '<CMD>!chmod +x %<CR>', 'Make file executable')
+  nmap('<leader><', ':@<CR>', 'Executes last command') -- FIXME
+
+  -- [[ TOGGLES ]]
+
+  nmap('<leader>,d', ':lua vim.diagnostic.enable(not vim.diagnostic.is_enabled())<CR>', 'Toggle diagnostics')
+
+  nmap('<leader>,w', ':set wrap!<CR>', 'Toggle line wrap')
+
+  nmap('<C-w>m', '<C-w>|<C-w>_', 'Max Out')
+
+  nmap('<leader>,z', toggle_zen, 'Toggle zen')
+
+  -- [[ QUICKFIX ]]
+
+  nmap('<A-n>', '<CMD>cnext<CR>', 'Next Place in QuickFix List')
+  nmap('<A-p>', '<CMD>cprev<CR>', 'Prev Place in QuickFix List')
+
+  nmap('<leader>cc', '<CMD>copen<CR>', 'Open Quickfix List')
+
+  nmap('<leader>cq', function()
+    vim.fn.setqflist({}, 'r') -- replace with empty list
+    vim.cmd.cclose()
+  end, 'Clear and close whole list')
+
+  nmap('<leader>ca', function()
+    local qf = vim.fn.getqflist()
+    table.insert(qf, {
+      bufnr = vim.api.nvim_get_current_buf(),
+      lnum = vim.fn.line '.',
+      col = vim.fn.col '.',
+      text = vim.fn.getline '.',
+    })
+    vim.fn.setqflist(qf, 'r')
+  end, 'Add current line to list (workspace wide)')
+
+  nmap('<leader>cd', function()
+    local qf = vim.fn.getqflist()
+    local idx = vim.fn.line '.' -- current line in quickfix window
+    if vim.bo.filetype ~= 'qf' then
+      vim.notify('Open quickfix window and place cursor on the entry to delete', vim.log.levels.WARN)
+      return
+    end
+    table.remove(qf, idx)
+    vim.fn.setqflist(qf, 'r')
+    vim.cmd.copen() -- refresh
+  end, 'Remove current line from list')
+
+  -- [[ TERMINAL ]]
+
+  nmap('<leader>>', ':terminal<CR>i', 'Open terminal')
+  tmap('<ESC><ESC>', '<C-\\><C-n>', 'Exit terminal mode')
+  tmap('<C-[>', '<C-\\><C-n>', 'Exit terminal mode')
+  map('<A->>', toggle_floating_terminal, 'Toggle floating terminal', silent, n, t, i, v)
+
+  -- [[ YANK ]]
+
+  vmap('p', 'P', 'Paste without yanking replaced text')
+  vmap('P', 'p', 'Paste and yank replaced text')
+
+  nmap('<leader>yn', function()
+    vim.fn.setreg('+', vim.fn.expand '%:t')
+    print('Yanked filename: ' .. vim.fn.expand '%:t')
+  end, 'Yank File Name')
+
+  nmap('<leader>yp', function()
+    vim.fn.setreg('+', vim.fn.expand '%:.')
+    print('Yanked relative path: ' .. vim.fn.expand '%:.')
+  end, 'Yank Relative File Path')
+
+  nmap('<leader>yP', function()
+    vim.fn.setreg('+', vim.fn.expand '%:p')
+    print('Yanked absolute path: ' .. vim.fn.expand '%:p')
+  end, 'Yank Absolute File Path')
+
+  nmap('<leader>yy', 'mzggVGy`z', 'Yank whole content')
+
+  nmap('<leader>yc', 'g<ggVGy<C-w>w', 'Yank cmdline message', remap) -- FIXME:
+
+  -- [[ EDITING ]]
+
+  nmap('<c-a>', 'ggVG', 'Select All Lines')
+  vmap('<c-a>', '<ESC>ggVG', 'Select All Lines')
+
+  imap('<C-d>', '<Del>', 'Delete next char')
+
+  nmap('J', 'mzJ`z', 'Join lines and keep cursor position')
+  nmap('<leader>j', 'J', 'Join lines and put cursor between')
+  nmap('<leader>J', function() mini_splitjoin.toggle({}) end, 'Toggle split/join arguments')
+
+  nmap('<A-o>', 'mzo<ESC>`z', 'Add blank line below cursor')
+  nmap('<A-S-o>', 'mzO<ESC>`z', 'Add blank line above cursor')
+
+  imap('<A-j>', '<ESC>:m +1<CR>gi', 'Move line down')
+  -- nmap('<A-j>', 'mz:m+1<CR>`z==', 'Move line down') -- mini.move does the same
+  -- vmap('<A-j>', ":m '>+1<CR>gv=gv", 'Move lines down') -- mini.move does the same
+  --
+  imap('<A-k>', '<ESC>:m -2<CR>gi', 'Move line up')
+  -- nmap('<A-k>', 'mz:m-2<CR>`z==', 'Move line up') -- mini.move does the same
+  -- vmap('<A-k>', ":m '<-2<CR>gv=gv", 'Move lines up') -- mini.move does the same
+
+  nmap('<A-h>', '<<', 'Indent left')
+  -- vmap('<A-h>', '<gv', 'Indent left and reselect') -- mini.move does the same
+
+  nmap('<A-l>', '>>', 'Indent right')
+  -- vmap('<A-l>', '>gv', 'Indent right and reselect') -- mini.move does the same
+
+  -- NOTE: notice `remap`. `gc` is not a builtin vim keymap. it's made in `defaults.lua` file
+  nmap('<leader>/', 'gcc', 'Toggle line comment', remap)
+  vmap('<leader>/', 'gc', 'Toggle comment', remap)
+  nmap('<leader>?', 'gcip', 'Toggle paragraph comment', remap)
+
+  nmap('<leader>u', function()
+    vim.cmd.packadd 'nvim.undotree'
+    require('undotree').open()
+  end, 'Undo Tree')
+
+  -- [[ BUFFER ]]
+
+  -- NOTE: `:help wincmd` for a list of all window commands
+
+  nmap('<leader><leader>', '<C-6>', 'Switch buffer')
+
+  nmap('<leader>xx', '<C-w>o', 'Close all splits but current')
+
+  nmap('<C-s>', ':Format<CR>:w<CR>', 'Format and write buffer')
+
+  nmap('H', ':bprevious<CR>', 'Go to previous buffer')
+  nmap('L', ':bnext<CR>', 'Go to next next')
+
+  -- nmap('[<leader>', 'gT', 'Go to previous tab')
+  -- nmap(']<leader>', 'gt', 'Go to next tab')
+
+  -- nmap('[w', '<C-w>W', 'Go to the previous window')
+  -- nmap(']w', '<C-w>w', 'Go to to the next window')
+
+  nmap('<C-h>', '<C-w><C-h>', 'Go to to the left window')
+  nmap('<C-l>', '<C-w><C-l>', 'Go to to the right window')
+  nmap('<C-j>', '<C-w><C-j>', 'Go to to the lower window')
+  nmap('<C-k>', '<C-w><C-k>', 'Go to to the upper window')
+
+  nmap('<A-S-h>', '<C-w>H', 'Move window to the left')
+  nmap('<A-S-l>', '<C-w>L:vertical resize 80<CR>', 'Move window to the right')
+  nmap('<A-S-j>', '<C-w>J', 'Move window to the lower')
+  nmap('<A-S-k>', '<C-w>K', 'Move window to the upper')
+
+  nmap('<C-Up>', ':resize +2<CR>', 'Increase height of current window')
+  nmap('<C-Right>', ':vertical resize +2<CR>', 'Increase width of current window')
+  nmap('<C-Down>', ':resize -2<CR>', 'Decrease height of current window')
+  nmap('<C-Left>', ':vertical resize -2<CR>', 'Decrease width of current window')
+  nmap('<C-w>8', ':vertical resize 80<CR>', 'Set width of current window to 80')
+
+  nmap('<leader>;', function() mini_pick.builtin.buffers() end, 'Pick buffer')
+  nmap('<leader>:', ':bd<CR>', 'Delete buffer')
+
+  nmap('<leader>.', function() mini_pick.builtin.files() end, 'Open file')
+
+  nmap('<leader>e', mini_files.open, 'File tree')
+
+  nmap('<leader>E', function()
+    mini_files.open(vim.api.nvim_buf_get_name(0), false)
+    mini_files.reveal_cwd()
+  end, 'File tree (current selected)')
+
+  -- [[ VIM ]]
+
+  nmap('<leader>vc', ':e ~/.config/nvim/init.lua<CR>', 'configure')
+  nmap('<leader>vv', ':Format<CR>:w<CR>:so %<CR>:nohlsearch<CR>', 'source')
+  nmap('<leader>vn', ':e ~/.config/nvim/NOTES.md<CR>', 'NOTES.md')
+  nmap('<leader>vt', ':e ~/.config/nvim/TOOLS.md<CR>', 'TOOLS.md')
+  nmap('<leader>vu', ':packupdate<CR>', 'update')
+
+  -- [[ SCROLLING ]]
+
+  nmap('j', "v:count == 0 ? 'gj' : 'j'", 'Down (wrap-aware)', expr)
+  nmap('k', "v:count == 0 ? 'gk' : 'k'", 'Up (wrap-aware)', expr)
+
+  nmap('n', 'nzzzv', 'Next search result with cursor centered')
+  nmap('N', 'Nzzzv', 'Previous search result with cursor centered')
+
+  nmap('<C-u>', '<C-u>zz', 'Half page up (centered)')
+  nmap('<C-d>', '<C-d>zz', 'Half page down (centered)')
+
+  nmap('[v', 'H', 'Scroll up to begginng of visible lines')
+  nmap(']v', 'L', 'Scroll down to begginng of visible lines')
+
+  -- [[ UI ]]
+
+  nmap('<C-0>', ':lua vim.g.neovide_scale_factor = 1<CR>', 'Reset zoom')
+  nmap('<C-=>', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.05<CR>', 'Zoom in')
+  nmap('<C-->', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.05<CR>', 'Zoom out')
+
+  nmap('<leader>,l', ':SelectNextTheme<CR>', 'Select next theme')
+  nmap('<leader>,h', ':SelectPreviousTheme<CR>', 'Select previous theme')
+  nmap('<leader>,T', ':Pick colorschemes<CR>', 'Change theme')
+  nmap('<leader>,t', function()
+    vim.o.background = vim.o.background == 'light' and 'dark' or 'light'
+  end, 'Toggle theme background')
+
+  -- [[ MASON ]]
+
+  nmap('<leader>mm', ':Mason<CR>', 'Open mason window')
+  nmap('<leader>mi', ':MasonInstall ', 'Mason install')
+  nmap('<leader>mp', ':lua print(vim.fn.exepath(""))<Left><Left><Left>', 'See installed lsp path')
+
+  -- [[ GIT ]]
+
+  -- [ fugitive ]
+  -- NOTE: `[c` previous hunk (on staged or history files)
+  -- NOTE: `]c` next hunk (on staged or history files)
+
+  -- [ mini.diff ]
+  -- NOTE: `[h` previous hunk
+  -- NOTE: `]h` next hunk
+  -- NOTE: `[H` first hunk
+  -- NOTE: `]H` last hunk
+  -- NOTE: `ghgh` applies hunk range under cursor.
+  -- NOTE: `gHgh` resets hunk range under cursor.
+  -- NOTE: `dgh` deletes hunk range under cursor
+  -- NOTE: `ghip` stage hunk inside current paragraph
+  -- NOTE: `gHip` reset hunk inside current paragraph
+  -- NOTE: `Vgh` stage selected hunk
+  -- NOTE: `VgH` reset selected hunk
+  -- NOTE: `ghl` stage line hunk
+  -- NOTE: `gHl` reset line hunk
+
+  nmap(
+    '<leader>gg',
+    '<CMD>Git | only<CR>',
+    'Status',
+    h('fugitive-maps')
+  )
+
+  nmap('<leader>gd', '<CMD>Gvdiffsplit<CR><C-w>l', 'Diff')
+
+  nmap('<leader>gbc', ':Git checkout ', 'Checkout to branch')
+
+  nmap('<leader>gbd', ':Git branch -D ', 'Delete branch')
+
+  nmap('<leader>gc', ':Git commit<CR>i', 'Commit')
+
+  nmap('<leader>gl', ':Gclog<CR>', 'Logs')
+
+  nmap('<leader>gb', ':Git blame<CR><C-w>l', 'Blame')
+
+  nmap(']<leader>', function() mini_diff.goto_hunk('next') end, 'Next hunk')
+  nmap('[<leader>', function() mini_diff.goto_hunk('prev') end, 'Previous hunk')
+
+  nmap('<leader>,g', mini_diff.toggle_overlay, 'Toggle git diff overlay')
+
+  -- vim.keymap.set("n", "]h", function() mini_diff.goto_hunk("next") end, { desc = "Next git hunk" })
+  -- vim.keymap.set("n", "[h", function() mini_diff.goto_hunk("prev") end, { desc = "Prev git hunk" })
+  --
+  -- vim.keymap.set("n", "<leader>gs", mini_diff.operator, { desc = "Stage hunk" })
+  -- vim.keymap.set("n", "<leader>hp", function() mini_diff.toggle_overlay() end, { desc = "Preview diff overlay" })
+  -- vim.keymap.set("n", "<leader>hb", function() MiniGit.show_at_cursor() end, { desc = "Git blame/show" })
+
+  -- [[ REPLACE ]]
+
+  nmap('<leader>rr', ':%s//gc<Left><Left><Left>', 'Replace snippet')
+  nmap('<leader>rw', [[:%s/<C-r><C-w>//gc<Left><Left><Left>]], 'Replace word under cursor')
+
+  -- [[ SEARCH ]]
+
+  nmap('<leader>p', ':Pick ', 'Pick')
+
+  nmap('<leader>sh', function() mini_pick.builtin.help() end, 'Search helps')
+
+  nmap('<leader>sk', function() mini_extra.pickers.keymaps() end, 'Search keymaps')
+
+  nmap('<leader>sw', function() mini_pick.builtin.grep { pattern = vim.fn.expand '<cword>' } end,
+    'Search word under cursor')
+
+  -- [[ MAP ]]
+
+  -- nmap('<leader>mc', mini_map.close, 'Close mini map')
+  -- nmap('<leader>mf', mini_map.toggle_focus, 'Toggle mini map focus')
+  -- nmap('<leader>mo', mini_map.open, 'Open mini map')
+  -- nmap('<leader>mr', mini_map.refresh, 'Refresh mini map')
+  -- nmap('<leader>ms', mini_map.toggle_side, 'Toggle mini map side')
+  -- nmap('<leader>mm', mini_map.toggle, 'Toggle mini map')
+end
+
+--- [[ DEFAULTS ]]
+--- NOTE: nmap('gri', vim.lip.buf.implementation, 'Go to implementation', opts)
+--- NOTE: nmap('grt', vim.lsp.buf.type_definition, 'Go to type definition', opts)
+--- NOTE: nmap('grr', vim.lsp.buf.references, 'Find references', opts)
+--- NOTE: nmap('grn;, vim.lsp.buf.rename, 'Rename', opts)
+--- NOTE: nmap('gra', vim.lsp.buf.code_action, opts, 'Code action', n, v, opts)
+--- NOTE: nmap('grx', vim.lsp.buf.run, 'Run code lens', opts)
+--- NOTE: nmap('gO', vim.lsp.buf.document_symbol, 'Document symbols', opts)
+--- NOTE: nmap('<C-s>', vim.lsp.buf.signature_help, 'Signature help', opts)
+--- NOTE: nmap('K', vim.lsp.buf.hover, "Show documentation", opts)
+--- NOTE: nmap('<C-w>d', vim.diagnostic.open_float, 'Show line diagnostics', opts)
+---@param ev vim.api.keyset.create_autocmd.callback_args?
+local function setup_lsp_keymaps(ev)
+  if ev == nil then
+    nmap({ '<leader>ol', '<leader>l.', 'gr.' }, '<C-w>s:e ~/.local/state/nvim/lsp.log<CR>G', 'Open lsp.log')
+
+    -- nmap({ '<leader>lm', 'grm' }, ':FormatAsync<CR>', 'Format current buffer asynchronously') -- TODO: remove
+
+    nmap(
+      { '<leader>lD', '<leader>sD', 'grD' },
+      function() mini_extra.pickers.diagnostic() end,
+      'Workspace diagnostics'
+    )
+
+    return
+  end
+
+  local client = vim.lsp.get_client_by_id(ev.data.client_id)
+  if not client then
+    return
+  end
+
+  local bufnr = ev.buf
+  local opts = { noremap = true, silent = true, buffer = bufnr }
+
+  -- local Fzf = require('fzf-lua')
+
+  nmap(
+    { '<leader>lf', 'grf' },
+    function() Fzf.lsp_definitions({ jump_to_single_result = true }) end,
+    'Definitions',
+    opts
+  )
+
+  nmap(
+    { 'gra', '<leader>la' },
+    vim.lsp.buf.code_action,
+    'Actions',
+    opts
+  )
+
+  nmap(
+    { 'gri', '<leader>li' },
+    function() Fzf.lsp_implementations() end,
+    'Implementations',
+    opts
+  )
+
+  nmap({ 'grn', '<leader>ln' }, vim.lsp.buf.rename, 'Rename', opts)
+
+  nmap(
+    { 'grr', '<leader>lr' },
+    function() Fzf.lsp_references() end,
+    'References',
+    opts
+  )
+
+  nmap(
+    { 'grt', '<leader>lt' },
+    function() Fzf.lsp_typedefs() end,
+    'Type definitions',
+    opts
+  )
+
+  nmap(
+    { 'grx', '<leader>lx' },
+    function() Fzf.lsp_typedefs() end,
+    'Code lens',
+    opts
+  ) -- TODO: code lens
+
+  nmap(
+    { '<C-w>d', '<leader>lc', 'grc' },
+    function() vim.diagnostic.open_float({ scope = 'cursor' }) end,
+    'Cursor diagnostics',
+    opts
+  )
+
+  nmap(
+    { '<C-w><C-d>', '<leader>ll', 'grl' },
+    function() vim.diagnostic.open_float({ scope = 'line' }) end,
+    'Line diagnostics',
+    opts
+  )
+
+  nmap(
+    { ']d', '<leader>l]', 'gr]' },
+    function() vim.diagnostic.jump({ count = 1 }) end,
+    'Next diagnostic',
+    opts
+  )
+
+  nmap(
+    { '[d', '<leader>l[', 'gr[' },
+    function() vim.diagnostic.jump({ count = -1 }) end,
+    'Previous diagnostic',
+    opts
+  )
+
+  nmap(
+    { '<leader>ld', '<leader>sd', 'grd' },
+    function() vim.diagnostic.setloclist({ open = true }) end,
+    'Buffer diagnostics',
+    opts
+  )
+
+  nmap(
+    { '<leader>ls', 'grs' },
+    function() Fzf.lsp_document_symbols() end,
+    'Buffer symbols',
+    opts
+  )
+
+  nmap(
+    { '<leader>lS', 'grS' },
+    function() Fzf.lsp_workspace_symbols() end,
+    'Workspace symbols',
+    opts
+  )
+
+  nmap({ '<leader>lF', 'grF' }, vim.lsp.buf.definition, 'Definition', opts)
+
+  nmap({ 'K', '<leader>lk', 'grk' }, vim.lsp.buf.hover, 'Display hover info', opts)
+
+  if client:supports_method('textDocument/codeAction', bufnr) then
+    nmap(
+      { '<leader>lm', 'grm' },
+      function()
+        vim.lsp.buf.code_action({
+          context = { only = { 'source.organizeImports' }, diagnostics = {} },
+          apply = true,
+          bufnr = bufnr,
+        })
+        vim.defer_fn(function()
+          vim.lsp.buf.format({ bufnr = bufnr })
+        end, 50)
+      end,
+      'Format buffer',
+      opts)
   end
 end
 
@@ -877,333 +1366,8 @@ local function setup_auto_commands()
       end
     end,
   })
-end
 
--------------------------------------------------------------
--- KEYMAPS
--------------------------------------------------------------
-
--- [ mini.jump2d ]
--- NOTE: n`<CR>` starts motion
---
--- [ mini.snippets ]
--- NOTE: `<C-l>` next placeholder
--- NOTE: `<C-h>` prev placeholder
---
--- [ mini.surround ]
--- NOTE: `sr'"` replaces ' with "
--- NOTE: `sd"` deletes surrounding (")
--- NOTE: `viwsa'` or `saiw'` surrounds selected with `'`
--- NOTE: `saiwtp className="m2"<CR>` surrounds selected with `<p className="m2">` and `</p>`
--- NOTE: `srtth3<CR>` replaces p tag with h3
--- NOTE: `srtb` deletes tags around and surrounds with ()
--- NOTE: `srb{` deletes () around and surrounds with {}
--- NOTE: `sd{` deletes {} around
---
--- [ mini.files ]
--- NOTE: close = "q",
--- NOTE: create_file = "o",
--- NOTE: rename_file = "ciw",
--- NOTE: delete_file = "dd",
--- NOTE: copy_file = "yyp",
--- NOTE: apply_changes = "=y",
---
-local function setup_keymaps(plugin_name, plugin_payload)
-  if plugin_name == 'lsp' then
-  end
-
-  if plugin_name ~= nil then return end
-
-  -- [[ OVERRIDES ]]
-
-  nmap('<ESC>', '<CMD>nohlsearch<CR>', 'Clear highlight search') -- NOTE: `:help hlsearch`
-
-  nmap('<left>', '<CMD>echo "Use h to move!!"<CR>')
-  nmap('<right>', '<CMD>echo "Use l to move!!"<CR>')
-  nmap('<up>', '<CMD>echo "Use k to move!!"<CR>')
-  nmap('<down>', '<CMD>echo "Use j to move!!"<CR>')
-
-  -- [[ UNCATEGORIZED ]]
-
-  nmap('<leader>oh', ':checkhealth<CR>', 'Health Check')
-  nmap('<leader>rx', '<CMD>!chmod +x %<CR>', 'Make file executable')
-  nmap('<leader><', ':@<CR>', 'Executes last command') -- FIXME
-
-  -- [[ TOGGLES ]]
-
-  nmap('<leader>,d', ':lua vim.diagnostic.enable(not vim.diagnostic.is_enabled())<CR>', 'Toggle diagnostics')
-
-  nmap('<leader>,w', ':set wrap!<CR>', 'Toggle line wrap')
-
-  nmap('<C-w>m', '<C-w>|<C-w>_', 'Max Out')
-
-  nmap('<leader>,z', toggle_zen, 'Toggle zen')
-
-  -- [[ QUICKFIX ]]
-
-  nmap('<A-n>', '<CMD>cnext<CR>', 'Next Place in QuickFix List')
-  nmap('<A-p>', '<CMD>cprev<CR>', 'Prev Place in QuickFix List')
-
-  nmap('<leader>cc', '<CMD>copen<CR>', 'Open Quickfix List')
-
-  nmap('<leader>cq', function()
-    vim.fn.setqflist({}, 'r') -- replace with empty list
-    vim.cmd.cclose()
-  end, 'Clear and close whole list')
-
-  nmap('<leader>ca', function()
-    local qf = vim.fn.getqflist()
-    table.insert(qf, {
-      bufnr = vim.api.nvim_get_current_buf(),
-      lnum = vim.fn.line '.',
-      col = vim.fn.col '.',
-      text = vim.fn.getline '.',
-    })
-    vim.fn.setqflist(qf, 'r')
-  end, 'Add current line to list (workspace wide)')
-
-  nmap('<leader>cd', function()
-    local qf = vim.fn.getqflist()
-    local idx = vim.fn.line '.' -- current line in quickfix window
-    if vim.bo.filetype ~= 'qf' then
-      vim.notify('Open quickfix window and place cursor on the entry to delete', vim.log.levels.WARN)
-      return
-    end
-    table.remove(qf, idx)
-    vim.fn.setqflist(qf, 'r')
-    vim.cmd.copen() -- refresh
-  end, 'Remove current line from list')
-
-  -- [[ TERMINAL ]]
-
-  nmap('<leader>>', ':terminal<CR>i', 'Open terminal')
-  tmap('<ESC><ESC>', '<C-\\><C-n>', 'Exit terminal mode')
-  tmap('<C-[>', '<C-\\><C-n>', 'Exit terminal mode')
-  map('<A->>', toggle_floating_terminal, 'Toggle floating terminal', silent, n, t, i, v)
-
-  -- [[ YANK ]]
-
-  vmap('p', 'P', 'Paste without yanking replaced text')
-  vmap('P', 'p', 'Paste and yank replaced text')
-
-  nmap('<leader>yn', function()
-    vim.fn.setreg('+', vim.fn.expand '%:t')
-    print('Yanked filename: ' .. vim.fn.expand '%:t')
-  end, 'Yank File Name')
-
-  nmap('<leader>yp', function()
-    vim.fn.setreg('+', vim.fn.expand '%:.')
-    print('Yanked relative path: ' .. vim.fn.expand '%:.')
-  end, 'Yank Relative File Path')
-
-  nmap('<leader>yP', function()
-    vim.fn.setreg('+', vim.fn.expand '%:p')
-    print('Yanked absolute path: ' .. vim.fn.expand '%:p')
-  end, 'Yank Absolute File Path')
-
-  nmap('<leader>yy', 'mzggVGy`z', 'Yank whole content')
-
-  nmap('<leader>yc', 'g<ggVGy<C-w>w', 'Yank cmdline message', remap) -- FIXME:
-
-  -- [[ EDITING ]]
-
-  nmap('<c-a>', 'ggVG', 'Select All Lines')
-  vmap('<c-a>', '<ESC>ggVG', 'Select All Lines')
-
-  imap('<C-d>', '<Del>', 'Delete next char')
-
-  nmap('J', 'mzJ`z', 'Join lines and keep cursor position')
-  nmap('<leader>j', 'J', 'Join lines and put cursor between')
-  nmap('<leader>J', function() MiniSplitjoin.toggle({}) end, 'Toggle split/join arguments')
-
-  nmap('<A-o>', 'mzo<ESC>`z', 'Add blank line below cursor')
-  nmap('<A-S-o>', 'mzO<ESC>`z', 'Add blank line above cursor')
-
-  imap('<A-j>', '<ESC>:m +1<CR>gi', 'Move line down')
-  -- nmap('<A-j>', 'mz:m+1<CR>`z==', 'Move line down') -- mini.move does the same
-  -- vmap('<A-j>', ":m '>+1<CR>gv=gv", 'Move lines down') -- mini.move does the same
-  --
-  imap('<A-k>', '<ESC>:m -2<CR>gi', 'Move line up')
-  -- nmap('<A-k>', 'mz:m-2<CR>`z==', 'Move line up') -- mini.move does the same
-  -- vmap('<A-k>', ":m '<-2<CR>gv=gv", 'Move lines up') -- mini.move does the same
-
-  nmap('<A-h>', '<<', 'Indent left')
-  -- vmap('<A-h>', '<gv', 'Indent left and reselect') -- mini.move does the same
-
-  nmap('<A-l>', '>>', 'Indent right')
-  -- vmap('<A-l>', '>gv', 'Indent right and reselect') -- mini.move does the same
-
-  -- NOTE: notice `remap`. `gc` is not a builtin vim keymap. it's made in `defaults.lua` file
-  nmap('<leader>/', 'gcc', 'Toggle line comment', remap)
-  vmap('<leader>/', 'gc', 'Toggle comment', remap)
-  nmap('<leader>?', 'gcip', 'Toggle paragraph comment', remap)
-
-  nmap('<leader>u', function()
-    vim.cmd.packadd 'nvim.undotree'
-    require('undotree').open()
-  end, 'Undo Tree')
-
-  -- [[ BUFFER ]]
-
-  -- NOTE: `:help wincmd` for a list of all window commands
-
-  nmap('<leader><leader>', '<C-6>', 'Switch buffer')
-
-  nmap('<leader>xx', '<C-w>o', 'Close all splits but current')
-
-  nmap('<leader>w', ':Format<CR>:w<CR>', 'Format and write buffer')
-
-  nmap('H', ':bprevious<CR>', 'Go to previous buffer')
-  nmap('L', ':bnext<CR>', 'Go to next next')
-
-  -- nmap('[<leader>', 'gT', 'Go to previous tab')
-  -- nmap(']<leader>', 'gt', 'Go to next tab')
-
-  -- nmap('[w', '<C-w>W', 'Go to the previous window')
-  -- nmap(']w', '<C-w>w', 'Go to to the next window')
-
-  nmap('<C-h>', '<C-w><C-h>', 'Go to to the left window')
-  nmap('<C-l>', '<C-w><C-l>', 'Go to to the right window')
-  nmap('<C-j>', '<C-w><C-j>', 'Go to to the lower window')
-  nmap('<C-k>', '<C-w><C-k>', 'Go to to the upper window')
-
-  nmap('<A-S-h>', '<C-w>H', 'Move window to the left')
-  nmap('<A-S-l>', '<C-w>L:vertical resize 80<CR>', 'Move window to the right')
-  nmap('<A-S-j>', '<C-w>J', 'Move window to the lower')
-  nmap('<A-S-k>', '<C-w>K', 'Move window to the upper')
-
-  nmap('<C-Up>', ':resize +2<CR>', 'Increase height of current window')
-  nmap('<C-Right>', ':vertical resize +2<CR>', 'Increase width of current window')
-  nmap('<C-Down>', ':resize -2<CR>', 'Decrease height of current window')
-  nmap('<C-Left>', ':vertical resize -2<CR>', 'Decrease width of current window')
-  nmap('<C-w>8', ':vertical resize 80<CR>', 'Set width of current window to 80')
-
-  nmap('<leader>;', function() MiniPick.builtin.buffers() end, 'Pick buffer')
-  nmap('<leader>:', ':bd<CR>', 'Delete buffer')
-
-  nmap('<leader>.', function() MiniPick.builtin.files() end, 'Open file')
-
-  nmap('<leader>f', function()
-    MiniFiles.open(vim.api.nvim_buf_get_name(0), false)
-    MiniFiles.reveal_cwd()
-  end, 'file tree')
-
-  -- [[ VIM ]]
-
-  nmap('<leader>vc', ':e ~/.config/nvim/init.lua<CR>', 'configure')
-  nmap('<leader>vv', ':Format<CR>:w<CR>:so %<CR>:nohlsearch<CR>', 'source')
-  nmap('<leader>vn', ':e ~/.config/nvim/NOTES.md<CR>', 'NOTES.md')
-  nmap('<leader>vt', ':e ~/.config/nvim/TOOLS.md<CR>', 'TOOLS.md')
-  nmap('<leader>vu', ':packupdate<CR>', 'update')
-
-  -- [[ SCROLLING ]]
-
-  nmap('j', "v:count == 0 ? 'gj' : 'j'", 'Down (wrap-aware)', expr)
-  nmap('k', "v:count == 0 ? 'gk' : 'k'", 'Up (wrap-aware)', expr)
-
-  nmap('n', 'nzzzv', 'Next search result with cursor centered')
-  nmap('N', 'Nzzzv', 'Previous search result with cursor centered')
-
-  nmap('<C-u>', '<C-u>zz', 'Half page up (centered)')
-  nmap('<C-d>', '<C-d>zz', 'Half page down (centered)')
-
-  nmap('[v', 'H', 'Scroll up to begginng of visible lines')
-  nmap(']v', 'L', 'Scroll down to begginng of visible lines')
-
-  -- [[ UI ]]
-
-  nmap('<C-0>', ':lua vim.g.neovide_scale_factor = 1<CR>', 'Reset zoom')
-  nmap('<C-=>', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.05<CR>', 'Zoom in')
-  nmap('<C-->', ':lua vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.05<CR>', 'Zoom out')
-
-  nmap('>>', ':SelectNextTheme<CR>', 'Select next theme')
-  nmap('<<', ':SelectPreviousTheme<CR>', 'Select previous theme')
-  nmap('<leader>,t', function()
-    vim.o.background = vim.o.background == 'light' and 'dark' or 'light'
-    -- Reapply current theme to force the background change
-    -- if vim.g.colors_name then
-    --   vim.cmd('colorscheme ' .. vim.g.colors_name)
-    -- end
-  end, 'Toggle theme')
-  nmap('<leader>,T', ':Pick colorschemes<CR>', 'Change theme')
-
-  -- [[ MASON ]]
-
-  nmap('<leader>mm', ':Mason<CR>', 'Open mason window')
-  nmap('<leader>mi', ':MasonInstall ', 'Mason install')
-  nmap('<leader>mp', ':lua print(vim.fn.exepath(""))<Left><Left><Left>', 'See installed lsp path')
-
-  -- [[ GIT ]]
-
-  -- [ mini.diff ]
-  -- NOTE: `[h` previous hunk
-  -- NOTE: `]h` next hunk
-  -- NOTE: `[H` first hunk
-  -- NOTE: `]H` last hunk
-  -- NOTE: `ghgh` applies hunk range under cursor.
-  -- NOTE: `gHgh` resets hunk range under cursor.
-  -- NOTE: `dgh` deletes hunk range under cursor
-  -- NOTE: `ghip` stage hunk inside current paragraph
-  -- NOTE: `gHip` reset hunk inside current paragraph
-  -- NOTE: `Vgh` stage selected hunk
-  -- NOTE: `VgH` reset selected hunk
-  -- NOTE: `ghl` stage line hunk
-  -- NOTE: `gHl` reset line hunk
-
-  nmap(
-    '<leader>gg',
-    '<CMD>Git | only<CR>',
-    'Status',
-    h('fugitive-maps')
-  )
-
-  nmap('<leader>gd', '<CMD>Gvdiffsplit<CR><C-w>l', 'Diff')
-
-  nmap('<leader>gbc', ':Git checkout ', 'Checkout to branch')
-
-  nmap('<leader>gbd', ':Git branch -D ', 'Delete branch')
-
-  nmap('<leader>gc', ':Git commit<CR>i', 'Commit')
-
-  nmap('<leader>gl', ':Gclog<CR>', 'Logs')
-
-  nmap('<leader>gb', ':Git blame<CR><C-w>l', 'Blame')
-
-  -- vim.keymap.set("n", "]h", function() MiniDiff.goto_hunk("next") end, { desc = "Next git hunk" })
-  -- vim.keymap.set("n", "[h", function() MiniDiff.goto_hunk("prev") end, { desc = "Prev git hunk" })
-  --
-  -- vim.keymap.set("n", "<leader>gs", MiniDiff.operator, { desc = "Stage hunk" })
-  -- vim.keymap.set("n", "<leader>hp", function() MiniDiff.toggle_overlay() end, { desc = "Preview diff overlay" })
-  -- vim.keymap.set("n", "<leader>hb", function() require("mini.git").show_at_cursor() end, { desc = "Git blame/show" })
-
-  -- [[ REPLACE ]]
-
-  nmap('<leader>rr', ':%s//gc<Left><Left><Left>', 'Replace snippet')
-  nmap('<leader>rw', [[:%s/<C-r><C-w>//gc<Left><Left><Left>]], 'Replace word under cursor')
-
-  -- [[ SEARCH ]]
-
-  nmap('<leader>p', ':Pick ', 'Pick')
-
-  nmap('<leader>sh', function() MiniPick.builtin.help() end, 'Search helps')
-  nmap('<leader>sk', function() MiniExtra.pickers.keymaps() end, 'Search keymaps')
-
-  nmap('<leader>sd', function() MiniExtra.pickers.diagnostic() end, 'Search diagnostics (workspace)')
-
-  nmap('<leader>sw', function() MiniPick.builtin.grep { pattern = vim.fn.expand '<cword>' } end,
-    'Search word under cursor')
-
-  -- [[ MAP ]]
-
-  -- nmap('<leader>mc', MiniMap.close, 'Close mini map')
-  -- nmap('<leader>mf', MiniMap.toggle_focus, 'Toggle mini map focus')
-  -- nmap('<leader>mo', MiniMap.open, 'Open mini map')
-  -- nmap('<leader>mr', MiniMap.refresh, 'Refresh mini map')
-  -- nmap('<leader>ms', MiniMap.toggle_side, 'Toggle mini map side')
-  -- nmap('<leader>mm', MiniMap.toggle, 'Toggle mini map')
-end
-
-local function set_lsp_keymaps()
+  vim.api.nvim_create_autocmd('LspAttach', { group = augroup, callback = setup_lsp_keymaps })
 end
 
 -------------------------------------------------------------
@@ -1212,47 +1376,50 @@ end
 
 -- NOTE: `:h lsp`
 local function setup_lsp()
-  -- local opts = event.buf
-  local opts = {}
-
-  -- [[ DEFAULTS ]]
-  -- NOTE: map('gri', vim.lip.buf.implementation, 'Go to implementation', opts)
-  -- NOTE: map('grt', vim.lsp.buf.type_definition, 'Go to type definition', opts)
-  -- NOTE: map('grr', vim.lsp.buf.references, 'Find references', opts)
-  -- NOTE: map('grn;, vim.lsp.buf.rename, 'Rename', opts)
-  -- NOTE: map(;gra', vim.lsp.buf.code_action, opts, 'Code action', n, v, opts)
-  -- NOTE: map('grx', vim.lsp.buf.run, 'Run code lens', opts)
-  -- NOTE: map('gO', vim.lsp.buf.document_symbol, 'Document symbols', opts)
-  -- NOTE: map('<C-s>', vim.lsp.buf.signature_help, 'Signature help', opts)
-  -- NOTE: map('K', vim.lsp.buf.hover, "Show documentation", opts)
-  -- NOTE: map('<C-w>d', vim.diagnostic.open_float, 'Show line diagnostics', opts)
-
   -- NOTE: `:help vim.diagnostic.opts`
   vim.diagnostic.config {
     update_in_insert = false,
     severity_sort = true,
-    float = { border = 'rounded', source = 'if_many' },
-    -- draws an underline below diagnosed words
-    underline = { severity = { min = vim.diagnostic.severity.warn } },
-
-    -- Can switch between these as you prefer
-    virtual_text = false,  -- Text shows up at the end of the line (TODO: false in zen mode)
-    virtual_lines = false, -- Text shows up underneath the line, with virtual lines
-
-    -- Auto open the float, so you can easily read the errors when jumping with `[d` and `]d`
-    jump = {
+    signs = vim.g.have_nerd_font and {
+      text = {
+        [vim.diagnostic.severity.ERROR] = '󰅚 ',
+        [vim.diagnostic.severity.WARN] = '󰀪 ',
+        [vim.diagnostic.severity.INFO] = '󰋽 ',
+        [vim.diagnostic.severity.HINT] = '󰌶 ',
+      },
+    } or {},
+    float = {
+      border = 'rounded',
+      source = 'if_many',
+      style = 'minimal',
+      focusable = true,
+    },
+    underline = false,    -- { severity = { min = vim.diagnostic.severity.WARN } },
+    virtual_text = false, -- Text shows up at the end of the line
+    virtual_lines = true, -- Text shows up underneath the line, with virtual lines
+    jump = {              -- Open the float on `[d` and `]d`
       on_jump = function(_, bufnr)
-        vim.diagnostic.open_float {
-          bufnr = bufnr,
-          scope = 'cursor',
-          focus = false,
-        }
+        if not vim.diagnostic.is_enabled() then
+          vim.diagnostic.open_float {
+            bufnr = bufnr,
+            scope = 'cursor',
+            focus = false,
+          }
+        end
       end,
     },
   }
 
+  local orig = vim.lsp.util.open_floating_preview
+  ---@diagnostic disable-next-line: duplicate-set-field
+  function vim.lsp.util.open_floating_preview(contents, syntax, preview_opts, ...)
+    local _opts = preview_opts or {}
+    _opts.border = _opts.border or 'rounded'
+    return orig(contents, syntax, _opts, ...)
+  end
+
   local capabilities = vim.lsp.protocol.make_client_capabilities()
-  capabilities = vim.tbl_deep_extend('force', capabilities, MiniCompletion.get_lsp_capabilities())
+  capabilities = vim.tbl_deep_extend('force', capabilities, mini_completion.get_lsp_capabilities())
 
   vim.lsp.config('*', { capabilities = capabilities })
 
@@ -1267,32 +1434,40 @@ local function setup_lsp()
     -- 'stylua', -- Used to format Lua code
   })
   vim.lsp.enable(ensure_installed)
+end
 
-  -- TODO move to setup_keymaps
-  nmap('grd', vim.lsp.buf.definition, 'Go to definition', opts)
-  nmap('<leader>ll', '<C-w>s:e ~/.local/state/nvim/lsp.log<CR>G', 'Open lsp.log')
-  nmap('grf', ':FormatAsync<CR>', 'Format current buffer asynchronously', opts)
+local function set_transparent()
+  local groups = {
+    'Normal',
+    'NormalNC',
+    'EndOfBuffer',
+    'NormalFloat',
+    'FloatBorder',
+    'SignColumn',
+    'StatusLine',
+    'StatusLineNC',
+    'TabLine',
+    'TabLineFill',
+    'TabLineSel',
+    'ColorColumn',
+  }
+  for _, g in ipairs(groups) do
+    vim.api.nvim_set_hl(0, g, { bg = 'none' })
+  end
+  vim.api.nvim_set_hl(0, 'TabLineFill', { bg = 'none', fg = '#767676' })
 end
 
 -------------------------------------------------------------
 -- INTEGRATE SETUPS
 -------------------------------------------------------------
 
--- NOTE: `g<` jumps to commandline output
-require('vim._core.ui2').enable {}
-
--- Enable faster startup by caching compiled Lua modules
-vim.loader.enable()
-
 vim.cmd('colorscheme ' .. themes[1])
 
 setup_options()
 
+-- set_transparent()
+
 if vim.fn.isdirectory(vim.o.undodir) == 0 then vim.fn.mkdir(vim.o.undodir, 'p') end
-
-setup_custom_commands()
-
-setup_auto_commands()
 
 keymap_adder = '#treesitter'
 require 'nvim-treesitter'.install(ensure_syntax_supported)
@@ -1317,7 +1492,7 @@ require('lazydev').setup {
 
 -- Split and join arguments
 keymap_adder = '#mini.splitjoin'
-MiniSplitjoin.setup({
+mini_splitjoin.setup({
   mappings = {
     toggle = '',
     split = '',
@@ -1327,7 +1502,7 @@ MiniSplitjoin.setup({
 
 -- Completion and signature help
 keymap_adder = '#mini.completion'
-MiniCompletion.setup {
+mini_completion.setup {
   lsp_completion = {
     auto_setup = true,
   },
@@ -1347,17 +1522,17 @@ require('mini.surround').setup({})
 
 -- --  Manage and expand snippets
 -- keymap_adder = '#mini.snippets'
--- MiniSnippets.setup {
+-- mini_snippets.setup {
 --   snippets = {
 --     -- loads friendly-snippets automatically
---     MiniSnippets.gen_loader.from_lang(),
+--     mini_snippets.gen_loader.from_lang(),
 --   },
 -- }
--- MiniSnippets.start_lsp_server { match = false }
+-- mini_snippets.start_lsp_server { match = false }
 
 -- --  Comment lines
 -- keymap_adder = '#mini.comment'
--- MiniComment.setup({})
+-- mini_comment.setup({})
 
 -- --  Extend and create `a`/`i` textobjects
 -- keymap_adder = '#mini.ai'
@@ -1378,7 +1553,7 @@ require('mini.surround').setup({})
 ------------------------------------------------------------- APPEARANCE
 
 keymap_adder = '#mini.icons'
-MiniIcons.setup {}
+mini_icons.setup {}
 
 keymap_adder = '#mini.animate'
 require 'mini.animate'.setup {
@@ -1390,13 +1565,13 @@ require 'mini.animate'.setup {
 }
 
 keymap_adder = '#mini.hipatterns'
-MiniHiPatterns.setup({
+mini_hipatterns.setup({
   highlighters = {
     fixme     = { pattern = '%f[%w]()FIXME()%f[%W]', group = 'MiniHipatternsFixme' },
     hack      = { pattern = '%f[%w]()HACK()%f[%W]', group = 'MiniHipatternsHack' },
     todo      = { pattern = '%f[%w]()TODO()%f[%W]', group = 'MiniHipatternsTodo' },
     note      = { pattern = '%f[%w]()NOTE()%f[%W]', group = 'MiniHipatternsNote' },
-    hex_color = MiniHiPatterns.gen_highlighter.hex_color(),
+    hex_color = mini_hipatterns.gen_highlighter.hex_color(),
   },
 })
 
@@ -1425,19 +1600,19 @@ require('mini.trailspace').setup({})
 keymap_adder = '#mini.tabline'
 require('mini.tabline').setup {
   format = function(buf_id, label)
-    -- add "*" suffix for modified buffers
-    local suffix = vim.bo[buf_id].modified and '* ' or ''
+    -- add "[+]" suffix for modified buffers
+    local suffix = vim.bo[buf_id].modified and '[+]' or ''
     return MiniTabline.default_format(buf_id, label) .. suffix
   end
 }
 
 -- -- Window with buffer text overview
 -- keymap_adder = '#mini.map'
--- MiniMap.setup({
+-- mini_map.setup({
 --   integrations = {
---     MiniMap.gen_integration.builtin_search(),
---     MiniMap.gen_integration.diagnostic(),
---     MiniMap.gen_integration.diff(),
+--     mini_map.gen_integration.builtin_search(),
+--     mini_map.gen_integration.diagnostic(),
+--     mini_map.gen_integration.diff(),
 --   }
 -- })
 
@@ -1477,7 +1652,9 @@ require('mini.jump').setup {}
 
 -- Jump within visible lines
 keymap_adder = '#mini.jump2d'
-require('mini.jump2d').setup {}
+require('mini.jump2d').setup {
+  view = { n_steps_ahead = 0 },
+}
 
 -- Session management
 keymap_adder = '#mini.sessions'
@@ -1489,11 +1666,11 @@ require('mini.misc').setup {}
 
 -- Pick anything
 keymap_adder = '#mini.pick'
-MiniPick.setup()
+mini_pick.setup()
 
 -- Extra 'mini.nvim' functionality
 keymap_adder = '#mini.extra'
-MiniExtra.setup()
+mini_extra.setup()
 
 -- Command line tweaks
 keymap_adder = '#mini.cmdline'
@@ -1503,7 +1680,7 @@ require('mini.cmdline').setup {
 
 -- Navigate and manipulate file system
 keymap_adder = '#mini.files'
-MiniFiles.setup {
+mini_files.setup {
   -- TODO: move them to keymap
   mappings = {
     go_in = '<CR>',
@@ -1515,7 +1692,7 @@ MiniFiles.setup {
 
 -- Work with diff hunks
 keymap_adder = '#mini.diff'
-MiniDiff.setup {
+mini_diff.setup {
   view = {
     style = 'sign',
     -- signs = { add = '▌', change = '▌', delete = '▂▂' },
@@ -1611,7 +1788,14 @@ require('mini.fuzzy').setup {}
 -- keymap_adder = '#mini.test'
 -- require('mini.test').setup()
 
----------------------------------------------------------------
+--------------------------------------------------------------- MY SETUP
 
 keymap_adder = '😎'
+
+setup_custom_commands()
+
+setup_auto_commands()
+
+setup_lsp_keymaps()
+
 setup_keymaps()

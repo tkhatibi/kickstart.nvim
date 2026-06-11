@@ -97,6 +97,12 @@ cd ~/.config/nvim/scripts
 sudo apt install -y fonts-noto-color-emoji xclip
 nix-env -iA nixpkgs.neovim
 
+# [[ HELIX ]]
+nix-env -iA nixpkgs.helix
+
+# [[ TMUX ]]
+nix-env -iA nixpkgs.tmux
+
 # [[ NEOVIDE ]]
 sudo apt install -y curl \
     gnupg ca-certificates git \

@@ -105,6 +105,14 @@ if [ -d $GOROOT ] ; then
 fi
 
 
+SDKMAN_DIR="$HOME/.sdkman"
+if [ -d $SDKMAN_DIR ] ; then
+    #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+    export SDKMAN_DIR="$SDKMAN_DIR"
+    [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+fi
+
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 __conda_setup="$('$HOME/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
@@ -119,14 +127,6 @@ else
 fi
 unset __conda_setup
 # <<< conda initialize <<<
-
-
-SDKMAN_DIR="$HOME/.sdkman"
-if [ -d $SDKMAN_DIR ] ; then
-    #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-    export SDKMAN_DIR="$SDKMAN_DIR"
-    [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
-fi
 
 
 # export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH

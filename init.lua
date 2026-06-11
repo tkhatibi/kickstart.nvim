@@ -1,3 +1,4 @@
+-- TODO: keymap to yank current line diagnostics
 -- TODO: editorconfig
 -- NOTE: `:bd` deletes buffer
 -- NOTE: `:za` toggles fold
@@ -6,7 +7,7 @@
 --   - following `in`s selects inner scope
 
 -------------------------------------------------------------
--- SETTINGS
+-- [S]ETTINGS
 -------------------------------------------------------------
 
 local animate = true
@@ -211,7 +212,7 @@ local servers = {
 }
 
 -------------------------------------------------------------
--- OPTIONS
+-- [O]PTIONS
 -------------------------------------------------------------
 
 -- NOTE: `:help vim.o`
@@ -357,7 +358,7 @@ local function setup_options()
 end
 
 -------------------------------------------------------------
--- HELPERS
+-- [H]ELPERS
 -------------------------------------------------------------
 
 local function contains(string, substring)
@@ -397,6 +398,7 @@ local function button(text)
   if contains(text, 'terminal') then return mini('filetype', 'sh') end
   if contains(text, 'execute') then return mini('filetype', 'sh') end
   if contains(text, 'comment') then return '💬 ' .. text end
+  if contains(text, 'action') then return '🔨 ' .. text end
   if contains(text, 'mark') then return '📌 ' .. text end
   if contains(text, 'mark') then return '⚓ ' .. text end
   if contains(text, 'mark') then return '🏷 ' .. text end
@@ -599,11 +601,12 @@ local function vmap(l, r, d, ...) map(l, r, d, v, ...) end
 local function xmap(l, r, d, ...) map(l, r, d, x, ...) end
 
 -------------------------------------------------------------
--- IMPORTS
+-- [I]MPORTS
 -------------------------------------------------------------
 
 vim.pack.add {
   'https://github.com/mg979/vim-visual-multi',
+  'https://github.com/ibhagwan/fzf-lua',
   'https://github.com/folke/lazydev.nvim',
   -- 'https://github.com/rafamadriz/friendly-snippets',
   'https://github.com/nvim-mini/mini.nvim',
@@ -617,10 +620,11 @@ vim.loader.enable()                -- Enable faster startup by caching compiled 
 
 require('vim._core.ui2').enable {} -- NOTE: `g<` jumps to commandline output
 
+local fzf = require 'fzf-lua'
 local mini_diff = require 'mini.diff'
 local mini_completion = require 'mini.completion'
 local mini_files = require 'mini.files'
-local mini_pick = require 'mini.pick'
+-- local mini_pick = require 'mini.pick'
 local mini_extra = require 'mini.extra'
 local mini_icons = require 'mini.icons'
 local mini_splitjoin = require 'mini.splitjoin'
@@ -630,7 +634,7 @@ local mini_hipatterns = require('mini.hipatterns')
 -- local mini_comment = require('mini.comment')
 
 -------------------------------------------------------------
--- CUSTOM FUNCTIONS
+-- CUSTOM [F]UNCTIONS
 -------------------------------------------------------------
 
 local fts = { buf = nil, win = nil, is_open = false } -- floating terminal state
@@ -851,7 +855,7 @@ local function setup_keymaps()
   nmap('<c-a>', 'ggVG', 'Select All Lines')
   vmap('<c-a>', '<ESC>ggVG', 'Select All Lines')
 
-  imap('<C-d>', '<Del>', 'Delete next char')
+  map('<C-d>', '<Del>', 'Delete next char', i, c)
 
   nmap('J', 'mzJ`z', 'Join lines and keep cursor position')
   nmap('<leader>j', 'J', 'Join lines and put cursor between')
@@ -919,10 +923,10 @@ local function setup_keymaps()
   nmap('<C-Left>', ':vertical resize -2<CR>', 'Decrease width of current window')
   nmap('<C-w>8', ':vertical resize 80<CR>', 'Set width of current window to 80')
 
-  nmap('<leader>;', function() mini_pick.builtin.buffers() end, 'Pick buffer')
+  nmap('<leader>;', function() fzf.buffers() end, 'Pick buffer')
   nmap('<leader>:', ':bd<CR>', 'Delete buffer')
 
-  nmap('<leader>.', function() mini_pick.builtin.files() end, 'Open file')
+  nmap('<leader>.', function() fzf.files() end, 'Open file')
 
   nmap('<leader>e', mini_files.open, 'File tree')
 
@@ -961,7 +965,7 @@ local function setup_keymaps()
 
   nmap('<leader>,l', ':SelectNextTheme<CR>', 'Select next theme')
   nmap('<leader>,h', ':SelectPreviousTheme<CR>', 'Select previous theme')
-  nmap('<leader>,T', ':Pick colorschemes<CR>', 'Change theme')
+  nmap('<leader>,T', function() fzf.colorschemes() end, 'Change theme')
   nmap('<leader>,t', function()
     vim.o.background = vim.o.background == 'light' and 'dark' or 'light'
   end, 'Toggle theme background')
@@ -1031,13 +1035,15 @@ local function setup_keymaps()
 
   -- [[ SEARCH ]]
 
-  nmap('<leader>p', ':Pick ', 'Pick')
+  nmap('<leader>ss', function() fzf.resume() end, 'Resume search')
 
-  nmap('<leader>sh', function() mini_pick.builtin.help() end, 'Search helps')
+  nmap('<leader>S', ':FzfLua ', 'Search anything')
 
-  nmap('<leader>sk', function() mini_extra.pickers.keymaps() end, 'Search keymaps')
+  nmap('<leader>sh', function() fzf.help_tags() end, 'Search helps')
 
-  nmap('<leader>sw', function() mini_pick.builtin.grep { pattern = vim.fn.expand '<cword>' } end,
+  nmap('<leader>sk', function() fzf.keymaps() end, 'Search keymaps')
+
+  nmap('<leader>sw', function() fzf.grep_cword() end,
     'Search word under cursor')
 
   -- [[ MAP ]]
@@ -1051,16 +1057,7 @@ local function setup_keymaps()
 end
 
 --- [[ DEFAULTS ]]
---- NOTE: nmap('gri', vim.lip.buf.implementation, 'Go to implementation', opts)
---- NOTE: nmap('grt', vim.lsp.buf.type_definition, 'Go to type definition', opts)
---- NOTE: nmap('grr', vim.lsp.buf.references, 'Find references', opts)
---- NOTE: nmap('grn;, vim.lsp.buf.rename, 'Rename', opts)
---- NOTE: nmap('gra', vim.lsp.buf.code_action, opts, 'Code action', n, v, opts)
---- NOTE: nmap('grx', vim.lsp.buf.run, 'Run code lens', opts)
---- NOTE: nmap('gO', vim.lsp.buf.document_symbol, 'Document symbols', opts)
 --- NOTE: nmap('<C-s>', vim.lsp.buf.signature_help, 'Signature help', opts)
---- NOTE: nmap('K', vim.lsp.buf.hover, "Show documentation", opts)
---- NOTE: nmap('<C-w>d', vim.diagnostic.open_float, 'Show line diagnostics', opts)
 ---@param ev vim.api.keyset.create_autocmd.callback_args?
 local function setup_lsp_keymaps(ev)
   if ev == nil then
@@ -1070,7 +1067,7 @@ local function setup_lsp_keymaps(ev)
 
     nmap(
       { '<leader>lD', '<leader>sD', 'grD' },
-      function() mini_extra.pickers.diagnostic() end,
+      function() fzf.diagnostics_workspace() end,
       'Workspace diagnostics'
     )
 
@@ -1085,25 +1082,25 @@ local function setup_lsp_keymaps(ev)
   local bufnr = ev.buf
   local opts = { noremap = true, silent = true, buffer = bufnr }
 
-  -- local Fzf = require('fzf-lua')
-
   nmap(
     { '<leader>lf', 'grf' },
-    function() Fzf.lsp_definitions({ jump_to_single_result = true }) end,
+    function() fzf.lsp_definitions({ jump_to_single_result = true }) end,
     'Definitions',
     opts
   )
 
-  nmap(
+  map(
     { 'gra', '<leader>la' },
-    vim.lsp.buf.code_action,
+    -- vim.lsp.buf.code_action,
+    function() fzf.lsp_code_actions() end,
     'Actions',
-    opts
+    opts, n, v
   )
 
   nmap(
     { 'gri', '<leader>li' },
-    function() Fzf.lsp_implementations() end,
+    -- vim.lsp.buf.implementation,
+    function() fzf.lsp_implementations() end,
     'Implementations',
     opts
   )
@@ -1112,21 +1109,23 @@ local function setup_lsp_keymaps(ev)
 
   nmap(
     { 'grr', '<leader>lr' },
-    function() Fzf.lsp_references() end,
+    -- vim.lsp.buf.references,
+    function() fzf.lsp_references() end,
     'References',
     opts
   )
 
   nmap(
     { 'grt', '<leader>lt' },
-    function() Fzf.lsp_typedefs() end,
+    -- vim.lsp.buf.type_definition
+    function() fzf.lsp_typedefs() end,
     'Type definitions',
     opts
   )
 
   nmap(
     { 'grx', '<leader>lx' },
-    function() Fzf.lsp_typedefs() end,
+    function() vim.lsp.buf.run() end,
     'Code lens',
     opts
   ) -- TODO: code lens
@@ -1153,6 +1152,20 @@ local function setup_lsp_keymaps(ev)
   )
 
   nmap(
+    { '[D', '<leader>l{', 'gr{' },
+    function() vim.diagnostic.jump({ count = -10000 }) end,
+    'First diagnostic',
+    opts
+  )
+
+  nmap(
+    { ']D', '<leader>l}', 'gr}' },
+    function() vim.diagnostic.jump({ count = 10000 }) end,
+    'Last diagnostic',
+    opts
+  )
+
+  nmap(
     { '[d', '<leader>l[', 'gr[' },
     function() vim.diagnostic.jump({ count = -1 }) end,
     'Previous diagnostic',
@@ -1161,21 +1174,23 @@ local function setup_lsp_keymaps(ev)
 
   nmap(
     { '<leader>ld', '<leader>sd', 'grd' },
-    function() vim.diagnostic.setloclist({ open = true }) end,
+    -- function() vim.diagnostic.setloclist({ open = true }) end,
+    function() fzf.diagnostics_document() end,
     'Buffer diagnostics',
     opts
   )
 
   nmap(
-    { '<leader>ls', 'grs' },
-    function() Fzf.lsp_document_symbols() end,
+    { 'gO', '<leader>ls', 'grs' },
+    -- vim.lsp.buf.document_symbol,
+    function() fzf.lsp_document_symbols() end,
     'Buffer symbols',
     opts
   )
 
   nmap(
     { '<leader>lS', 'grS' },
-    function() Fzf.lsp_workspace_symbols() end,
+    function() fzf.lsp_workspace_symbols() end,
     'Workspace symbols',
     opts
   )
@@ -1203,7 +1218,7 @@ local function setup_lsp_keymaps(ev)
 end
 
 -------------------------------------------------------------
--- CUSTOM COMMANDS
+-- CUSTOM [C]OMMANDS
 -------------------------------------------------------------
 
 local function setup_custom_commands()
@@ -1279,7 +1294,7 @@ local function setup_custom_commands()
 end
 
 -------------------------------------------------------------
--- BASIC AUTOCOMMANDS
+-- BASIC [A]UTOCOMMANDS
 -------------------------------------------------------------
 
 local augroup = vim.api.nvim_create_augroup('UserConfig', { clear = true })
@@ -1371,7 +1386,7 @@ local function setup_auto_commands()
 end
 
 -------------------------------------------------------------
--- PLUGINS
+-- [P]LUGINS
 -------------------------------------------------------------
 
 -- NOTE: `:h lsp`
@@ -1458,7 +1473,7 @@ local function set_transparent()
 end
 
 -------------------------------------------------------------
--- INTEGRATE SETUPS
+-- [W]RAP THEM ALL
 -------------------------------------------------------------
 
 vim.cmd('colorscheme ' .. themes[1])
@@ -1488,7 +1503,7 @@ require('lazydev').setup {
   },
 }
 
-------------------------------------------------------------- TEXT EDITING
+------------------------------------------------------------- [T]EXT EDITING
 
 -- Split and join arguments
 keymap_adder = '#mini.splitjoin'
@@ -1550,7 +1565,7 @@ require('mini.surround').setup({})
 -- keymap_adder = '#mini.operators'
 -- require('mini.operators').setup({})
 
-------------------------------------------------------------- APPEARANCE
+------------------------------------------------------------- [U]I
 
 keymap_adder = '#mini.icons'
 mini_icons.setup {}
@@ -1578,7 +1593,7 @@ mini_hipatterns.setup({
 keymap_adder = '#mini.statusline'
 local statusline = require 'mini.statusline'
 statusline.setup { use_icons = vim.g.have_nerd_font }
-statusline.section_location = function() return '%2l:%-2v/%2L' end
+statusline.section_location = function() return '%2l/%2L %-2v' end
 
 -- Autohighlight word under cursor
 keymap_adder = '#mini.cursorword'
@@ -1632,11 +1647,20 @@ require('mini.tabline').setup {
 -- keymap_adder = '#mini.starter'
 -- require('mini.starter').setup({})
 
-------------------------------------------------------------- GENERAL WORKFLOW
+------------------------------------------------------------- [G]ENERAL WORKFLOW
 
 -- Common configuration presets
 keymap_adder = '#mini.basics'
-require('mini.basics').setup({})
+require('mini.basics').setup({
+  options = {
+    extra_ui = true,        -- Extra UI features ('winblend', 'listchars', 'pumheight', ...)
+    win_borders = 'double', -- Presets for window borders ('single', 'double', ...)
+  },
+  mappings = {
+    basic = false,
+    move_with_alt = true, -- Move cursor in Insert, Command, and Terminal mode with <M-hjkl>
+  },
+})
 
 -- Go forward/backward with square brackets
 -- keymap_adder = '#mini.bracketed'
@@ -1665,8 +1689,17 @@ keymap_adder = '#mini.misc'
 require('mini.misc').setup {}
 
 -- Pick anything
-keymap_adder = '#mini.pick'
-mini_pick.setup()
+-- keymap_adder = '#mini.pick'
+-- mini_pick.setup()
+keymap_adder = '#fzf-lua'
+fzf.setup {
+  fzf_bin = 'sk',
+  defaults = {
+    file_icons = 'mini',
+    resume = true,
+    no_resume = false,
+  },
+}
 
 -- Extra 'mini.nvim' functionality
 keymap_adder = '#mini.extra'
@@ -1777,8 +1810,8 @@ MiniClue.setup({
 --------------------------------------------------------------- MINI OTHERS
 
 -- -- Fuzzy matching
-keymap_adder = '#mini.fuzzy'
-require('mini.fuzzy').setup {}
+-- keymap_adder = '#mini.fuzzy'
+-- require('mini.fuzzy').setup {}
 
 -- -- Generate Neovim help files
 -- keymap_adder = '#mini.doc'
@@ -1788,7 +1821,7 @@ require('mini.fuzzy').setup {}
 -- keymap_adder = '#mini.test'
 -- require('mini.test').setup()
 
---------------------------------------------------------------- MY SETUP
+--------------------------------------------------------------- [M]Y SETUP
 
 keymap_adder = '😎'
 

@@ -1010,7 +1010,8 @@ local function setup_keymaps()
 
   nmap('<leader>gbd', ':Git branch -D ', 'Delete branch')
 
-  nmap('<leader>gc', ':Git commit<CR>i', 'Commit')
+  nmap('<leader>gc', ':!git commit -m ""<LEFT>', 'Commit (command)')
+  nmap('<leader>gC', ':Git commit<CR>i', 'Commit (buffer)')
 
   nmap('<leader>gl', ':Gclog<CR>', 'Logs')
 

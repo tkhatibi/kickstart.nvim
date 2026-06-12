@@ -74,22 +74,28 @@ local servers = {
   -- docker_compose_language_service = {},
   -- gitlab_ci_ls = {}, -- unofficial (rust)
   -- gh_actions_ls = {}, -- unofficial (javascript)
-  -- ols = {}, -- odin ls
-  -- vacuum = {}, -- openapi 2 and 3 (go)
-  -- gopls = {}, -- golang
-  -- pyright = {},
-  clangd = {},
+  roslyn_ls = {},      -- official csharp/dotnet lsp
+  ols = {},            -- unofficial odin ls
+  vacuum = {},         -- openapi 2 and 3 (go)
+  gopls = {},          -- golang
+  pyright = {},        -- python
+  clangd = {},         -- c, c++
   neocmakelsp = {},    -- faster than cmake (rust)
-  jinja_lsp = {},
-  css_variables = {},  -- unofficial (typescript)
+  jinja_lsp = {},      -- LSP for jinja (a template engine for both python and rust)
   buf_ls = {},         -- proto buffer (go)
-  tailwindcss = {},    -- official
+  vue_ls = {},         -- official vue lsp
+  expert = {},         -- official elixir lsp
+  kotlin_lsp = {},     -- official kotlin lsp
+  tailwindcss = {},    -- official tailwind lsp
   html = {},           -- vscode extracted (js)
   eslint = {},         -- vscode extracted (js)
   cssls = {},          -- vscode extracted (js)
   jsonls = {},         -- vscode extracted (js)
+  css_variables = {},  -- unofficial (typescript)
   markdown_oxide = {}, -- markdown ls (rust)
   taplo = {},          -- toml formatter (rust)
+  zls = {},            -- Zig LSP implementation + Zig Language Server
+  c3_lsp = {},         -- Language Server for c3.
   rust_analyzer = {
     settings = {
       ['rust-analyzer'] = {
@@ -343,6 +349,9 @@ local function setup_options()
   vim.o.list = true
   vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
   vim.o.completeopt = 'menuone,noselect,fuzzy,nosort,noinsert'
+  vim.o.autocomplete = true
+  vim.o.complete = 'w,b,u,t'
+  vim.o.pumheight = 10
   vim.o.wildmenu = true -- tab completion
   vim.opt.shortmess:append 'c'
 
@@ -606,6 +615,7 @@ local function xmap(l, r, d, ...) map(l, r, d, x, ...) end
 
 vim.pack.add {
   'https://github.com/mg979/vim-visual-multi',
+  'https://github.com/mfussenegger/nvim-jdtls',
   'https://github.com/ibhagwan/fzf-lua',
   'https://github.com/folke/lazydev.nvim',
   -- 'https://github.com/rafamadriz/friendly-snippets',

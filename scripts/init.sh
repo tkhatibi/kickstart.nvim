@@ -12,34 +12,43 @@ bun_enabled=false
 emsdk_enabled=false
 lua_enabled=true
 
+
+export PATH=$HOME/.local/share/nvim/mason/bin:$PATH
 export PATH=$HOME/.config/nvim/bin:$PATH
+
+
+MISE_HOME="$HOME/.local/share/mise"
+if [ -d $MISE_HOME ] ; then
+  eval "$(mise activate bash)"
+fi
+
 
 # to run `cargo test --doc`
 export PATH="$PATH:$(rustc --print target-libdir)"
 
+
 # export PATH=$HOME/3rd-parties/bin:$PATH
 # export PATH=$PATH:/snap/bin
 
+
 alias godot4='godot4 --editor'
+
 
 if [[ $lua_enabled == true ]]; then
     eval "$(luarocks path --bin)"
 fi
+
 
 if [[ $emsdk_enabled == true ]]; then
     source $HOME/3rd-parties/emsdk/emsdk_env.sh
     clear
 fi
 
-ODIN_ROOT=/usr/local/odin
-if [ -d $ODIN_ROOT ] ; then
-    export ODIN_ROOT="$ODIN_ROOT"
-    export PATH=/usr/local/odin:$PATH
-fi
 
 if [[ $nim_enabled == true ]]; then
     export PATH=$HOME/.nimble/bin:$PATH
 fi
+
 
 if [[ $zig_enabled == true ]]; then
     export PATH="$HOME/.zig/zig-linux-x86_64-0.14.0:$PATH"
@@ -67,7 +76,7 @@ if [ -d $NVM_DIR ] ; then
 fi
 
 
-PNPM_HOME="/home/touraj/.local/share/pnpm"
+PNPM_HOME="$HOME/.local/share/pnpm"
 if [ -d $PNPM_HOME ] ; then
     export PNPM_HOME="$PNPM_HOME"
     case ":$PATH:" in
@@ -77,19 +86,10 @@ if [ -d $PNPM_HOME ] ; then
 fi
 
 
-PNPM_HOME="$HOME/.local/share/pnpm"
-if [ -d $PNPM_HOME ] ; then
-    export PNPM_HOME="$PNPM_HOME"
-    case ":$PATH:" in
-    *":$PNPM_HOME:"*) ;;
-    *) export PATH="$PNPM_HOME:$PATH" ;;
-    esac
-fi
-
-
 if [[ $deno_enabled == true ]]; then
     . "$HOME/.deno/env"
 fi
+
 
 if [[ $bun_enabled == true ]]; then
     [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
@@ -102,6 +102,20 @@ GOROOT=/usr/local/go
 if [ -d $GOROOT ] ; then
     export GOROOT="$GOROOT"
     export PATH=$PATH:$GOROOT/bin
+fi
+
+
+ODIN_ROOT=/usr/local/odin
+if [ -d $ODIN_ROOT ] ; then
+  export ODIN_ROOT="$ODIN_ROOT"
+  export PATH=/usr/local/odin:$PATH
+fi
+
+
+C3C_LIB=/usr/local/c3/lib
+if [ -d $C3C_LIB ] ; then
+    export C3C_LIB="$C3C_LIB"
+    export PATH=$PATH:/usr/local/c3
 fi
 
 
